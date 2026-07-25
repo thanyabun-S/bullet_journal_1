@@ -785,29 +785,30 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="sidebar-brand">
-        <h1>📓 Bullet Journal</h1>
+        <h1 id="brand-label">📓 Bullet Journal</h1>
         <button type="button" class="icon-btn-plain mobile-only" id="sidebar-close" title="Close sidebar">✕</button>
       </div>
       <button type="button" class="new-entry-btn" id="focus-input-btn">✎ New entry</button>
       <div class="sidebar-search">
         <input type="text" id="search-input" placeholder="Search past entries...">
         <select id="filter-select">
-          <option value="all">All types</option>
-          <option value="task">Tasks</option>
-          <option value="event">Events</option>
-          <option value="note">Notes</option>
-          <option value="important">Important</option>
+          <option value="all" id="filter-opt-all">All types</option>
+          <option value="task" id="filter-opt-task">Tasks</option>
+          <option value="event" id="filter-opt-event">Events</option>
+          <option value="note" id="filter-opt-note">Notes</option>
+          <option value="important" id="filter-opt-important">Important</option>
         </select>
       </div>
     </div>
 
     <div class="sidebar-history">
-      <div class="sidebar-history-label">History</div>
+      <div class="sidebar-history-label" id="history-label">History</div>
       <div id="history-container"></div>
     </div>
 
     <div class="sidebar-bottom">
       <button type="button" class="sidebar-btn" id="theme-toggle" title="Toggle dark mode">🌙 Dark mode</button>
+      <button type="button" class="sidebar-btn" id="lang-toggle" title="Switch language"></button>
       <div class="sidebar-bottom-row">
         <button type="button" class="sidebar-btn" id="export-btn" title="Download entries as JSON">⬇ Export</button>
         <button type="button" class="sidebar-btn" id="import-btn" title="Restore entries from JSON">⬆ Import</button>
@@ -820,14 +821,14 @@
     <header class="main-topbar">
       <button type="button" class="icon-btn-plain mobile-only" id="sidebar-toggle" title="Open sidebar">☰</button>
       <div class="main-topbar-date">
-        Task Board
+        <span id="task-board-label">Task Board</span>
         <span class="sub" id="today-display"></span>
       </div>
     </header>
 
     <div class="board-scroll">
       <section class="board-section" id="today-section">
-        <h2>Today's Entries <span class="section-badge" id="today-label"></span></h2>
+        <h2><span id="today-entries-label">Today's Entries</span> <span class="section-badge" id="today-label"></span></h2>
         <div class="progress-wrap" id="today-progress-wrap">
           <div class="progress-track"><div class="progress-fill" id="today-progress-fill"></div></div>
           <span class="progress-text" id="today-progress-text"></span>
@@ -838,14 +839,14 @@
       </section>
 
       <section class="board-section" id="incomplete-section">
-        <h2>Incomplete Tasks <span class="section-badge">from previous days</span></h2>
+        <h2><span id="incomplete-label">Incomplete Tasks</span> <span class="section-badge" id="incomplete-badge">from previous days</span></h2>
         <div class="board-card">
           <ul class="entry-list" id="incomplete-list"></ul>
         </div>
       </section>
 
       <section class="board-section" id="migrated-section">
-        <h2>Upcoming / Migrated Tasks <span class="section-badge">&gt; / &lt;</span></h2>
+        <h2><span id="migrated-label">Upcoming / Migrated Tasks</span> <span class="section-badge">&gt; / &lt;</span></h2>
         <div class="board-card">
           <ul class="entry-list" id="migrated-list"></ul>
         </div>
@@ -863,16 +864,7 @@
         <input type="date" id="due-date-input" title="Due date (optional)">
         <button type="submit" id="add-btn" title="Add entry">↑</button>
       </form>
-      <div class="legend">
-        <span>• task</span>
-        <span>○ event</span>
-        <span>– note</span>
-        <span>☆ important</span>
-        <span>⊘ cancel</span>
-        <span>⋮⋮ drag to reorder</span>
-        <span>📅 due date</span>
-        <span>Double-click text to edit</span>
-      </div>
+      <div class="legend" id="legend"></div>
     </div>
   </main>
 </div>
@@ -880,10 +872,126 @@
 <script>
   const STORAGE_KEY = 'bulletJournalEntries';
   const THEME_KEY = 'bulletJournalTheme';
+  const LANG_KEY = 'bulletJournalLang';
   const MANUAL_ORDER_KEY = 'bulletJournalManualOrder';
   const BULLET_SYMBOLS = { event: '○', note: '–' };
   const STATUS_ORDER = ['incomplete', 'completed', 'migrated', 'scheduled'];
   const STATUS_SYMBOLS = { incomplete: '•', completed: '✔', migrated: '>', scheduled: '<' };
+
+  const TRANSLATIONS = {
+    en: {
+      brand: '📓 Bullet Journal',
+      newEntry: '✎ New entry',
+      searchPlaceholder: 'Search past entries...',
+      filterAll: 'All types',
+      filterTask: 'Tasks',
+      filterEvent: 'Events',
+      filterNote: 'Notes',
+      filterImportant: 'Important',
+      history: 'History',
+      darkMode: '🌙 Dark mode',
+      lightMode: '☀️ Light mode',
+      langToggle: '🌐 ภาษาไทย',
+      exportBtn: '⬇ Export',
+      importBtn: '⬆ Import',
+      taskBoard: 'Task Board',
+      todayEntries: "Today's Entries",
+      incompleteTasks: 'Incomplete Tasks',
+      fromPreviousDays: 'from previous days',
+      migratedTasks: 'Upcoming / Migrated Tasks',
+      entryPlaceholder: 'Add a task, event, or note for today...',
+      legendTask: '• task', legendEvent: '○ event', legendNote: '– note',
+      legendImportant: '☆ important', legendCancel: '⊘ cancel',
+      legendDrag: '⋮⋮ drag to reorder', legendDue: '📅 due date',
+      legendEdit: 'Double-click text to edit',
+      typeTask: 'Task', typeEvent: 'Event', typeNote: 'Note',
+      cycleStatusTitle: 'Click to cycle status: incomplete → completed → migrated → scheduled',
+      eventTitle: 'Event', noteTitle: 'Note',
+      dueTitle: 'Due ',
+      setDueDate: 'Set due date',
+      markImportant: 'Mark important', unmarkImportant: 'Unmark important',
+      cancelEntry: 'Cancel entry', uncancelEntry: 'Uncancel entry',
+      addSubnote: 'Add sub-note', deleteTitle: 'Delete',
+      editTitle: 'Double-click to edit',
+      subnotePlaceholder: 'Sub-note...',
+      noEntriesToday: 'No entries yet today. Add one below.',
+      noTasksToday: 'No tasks yet today',
+      tasksCompleted: (c, t, p) => c + ' / ' + t + ' tasks completed (' + p + '%)',
+      allCaughtUp: "You're all caught up — no incomplete tasks from previous days.",
+      noMigrated: 'No migrated or scheduled tasks.',
+      noPastEntries: 'No past entries yet.',
+      noPastMatch: 'No past entries match your search.',
+      noImportantEntries: 'No important entries',
+      moreCount: n => '+' + n + ' more',
+      entryCount: n => n + (n === 1 ? ' entry' : ' entries'),
+      matchCount: n => n + ' match' + (n === 1 ? '' : 'es'),
+      importConfirm: 'Importing will replace all current entries. Continue?',
+      importFailed: 'Import failed: the selected file is not a valid Bullet Journal export.',
+      deleteConfirmWithChildren: 'Delete this entry and its sub-notes? This cannot be undone.',
+      deleteConfirm: 'Delete this entry? This cannot be undone.',
+      closeSidebar: 'Close sidebar', openSidebar: 'Open sidebar',
+      toggleDarkMode: 'Toggle dark mode', toggleLang: 'Switch language',
+      exportTitle: 'Download entries as JSON', importTitle: 'Restore entries from JSON',
+      addEntryTitle: 'Add entry', dueDateOptional: 'Due date (optional)',
+      locale: 'en-US'
+    },
+    th: {
+      brand: '📓 บันทึกประจำวัน',
+      newEntry: '✎ เพิ่มรายการใหม่',
+      searchPlaceholder: 'ค้นหารายการที่ผ่านมา...',
+      filterAll: 'ทุกประเภท',
+      filterTask: 'งาน',
+      filterEvent: 'กิจกรรม',
+      filterNote: 'บันทึกย่อ',
+      filterImportant: 'สำคัญ',
+      history: 'ประวัติ',
+      darkMode: '🌙 โหมดมืด',
+      lightMode: '☀️ โหมดสว่าง',
+      langToggle: '🌐 English',
+      exportBtn: '⬇ ส่งออก',
+      importBtn: '⬆ นำเข้า',
+      taskBoard: 'บอร์ดงาน',
+      todayEntries: 'รายการวันนี้',
+      incompleteTasks: 'งานที่ยังไม่เสร็จ',
+      fromPreviousDays: 'จากวันก่อนหน้า',
+      migratedTasks: 'งานที่เลื่อน / กำหนดใหม่',
+      entryPlaceholder: 'เพิ่มงาน กิจกรรม หรือบันทึกย่อสำหรับวันนี้...',
+      legendTask: '• งาน', legendEvent: '○ กิจกรรม', legendNote: '– บันทึกย่อ',
+      legendImportant: '☆ สำคัญ', legendCancel: '⊘ ยกเลิก',
+      legendDrag: '⋮⋮ ลากเพื่อจัดลำดับ', legendDue: '📅 วันครบกำหนด',
+      legendEdit: 'ดับเบิลคลิกข้อความเพื่อแก้ไข',
+      typeTask: 'งาน', typeEvent: 'กิจกรรม', typeNote: 'บันทึกย่อ',
+      cycleStatusTitle: 'คลิกเพื่อสลับสถานะ: ยังไม่เสร็จ → เสร็จแล้ว → เลื่อน → กำหนดใหม่',
+      eventTitle: 'กิจกรรม', noteTitle: 'บันทึกย่อ',
+      dueTitle: 'ครบกำหนด ',
+      setDueDate: 'กำหนดวันครบกำหนด',
+      markImportant: 'ทำเครื่องหมายว่าสำคัญ', unmarkImportant: 'ยกเลิกเครื่องหมายสำคัญ',
+      cancelEntry: 'ยกเลิกรายการ', uncancelEntry: 'ยกเลิกการยกเลิก',
+      addSubnote: 'เพิ่มบันทึกย่อย', deleteTitle: 'ลบ',
+      editTitle: 'ดับเบิลคลิกเพื่อแก้ไข',
+      subnotePlaceholder: 'บันทึกย่อย...',
+      noEntriesToday: 'ยังไม่มีรายการวันนี้ เพิ่มรายการด้านล่าง',
+      noTasksToday: 'ยังไม่มีงานวันนี้',
+      tasksCompleted: (c, t, p) => c + ' / ' + t + ' งานเสร็จแล้ว (' + p + '%)',
+      allCaughtUp: 'คุณทำงานครบหมดแล้ว — ไม่มีงานที่ยังไม่เสร็จจากวันก่อนหน้า',
+      noMigrated: 'ไม่มีงานที่เลื่อนหรือกำหนดใหม่',
+      noPastEntries: 'ยังไม่มีรายการที่ผ่านมา',
+      noPastMatch: 'ไม่พบรายการที่ตรงกับการค้นหา',
+      noImportantEntries: 'ไม่มีรายการสำคัญ',
+      moreCount: n => '+' + n + ' เพิ่มเติม',
+      entryCount: n => n + ' รายการ',
+      matchCount: n => n + ' ที่ตรงกัน',
+      importConfirm: 'การนำเข้าจะแทนที่รายการทั้งหมดที่มีอยู่ ดำเนินการต่อหรือไม่?',
+      importFailed: 'นำเข้าล้มเหลว: ไฟล์ที่เลือกไม่ใช่ไฟล์ส่งออกของ Bullet Journal ที่ถูกต้อง',
+      deleteConfirmWithChildren: 'ลบรายการนี้และบันทึกย่อยทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้',
+      deleteConfirm: 'ลบรายการนี้? การกระทำนี้ไม่สามารถย้อนกลับได้',
+      closeSidebar: 'ปิดแถบด้านข้าง', openSidebar: 'เปิดแถบด้านข้าง',
+      toggleDarkMode: 'สลับโหมดมืด', toggleLang: 'สลับภาษา',
+      exportTitle: 'ดาวน์โหลดรายการเป็น JSON', importTitle: 'กู้คืนรายการจาก JSON',
+      addEntryTitle: 'เพิ่มรายการ', dueDateOptional: 'วันครบกำหนด (ไม่บังคับ)',
+      locale: 'th-TH'
+    }
+  };
 
   function genId() {
     return Date.now() + '-' + Math.random().toString(36).slice(2, 8);
@@ -897,13 +1005,13 @@
   function formatDateLabel(dateKey) {
     const [y, m, d] = dateKey.split('-').map(Number);
     const date = new Date(y, m - 1, d);
-    return date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString(t().locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   }
 
   function formatDateShort(dateKey) {
     const [y, m, d] = dateKey.split('-').map(Number);
     const date = new Date(y, m - 1, d);
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(t().locale, { month: 'short', day: 'numeric' });
   }
 
   function escapeHtml(str) {
@@ -923,7 +1031,7 @@
     if (!dueDate) return '';
     const status = dueDateStatus(dueDate);
     const icon = status === 'overdue' ? '⚠' : '📅';
-    return '<span class="due-badge due-' + status + '" title="Due ' + escapeHtml(formatDateLabel(dueDate)) + '">'
+    return '<span class="due-badge due-' + status + '" title="' + escapeHtml(t().dueTitle) + escapeHtml(formatDateLabel(dueDate)) + '">'
       + icon + ' ' + escapeHtml(formatDateShort(dueDate)) + '</span>';
   }
 
@@ -984,6 +1092,8 @@
 
   let entries = loadEntries();
   let manualOrder = loadManualOrder();
+  let currentLang = localStorage.getItem(LANG_KEY) === 'th' ? 'th' : 'en';
+  function t() { return TRANSLATIONS[currentLang]; }
   let selectedType = 'task';
   let addingSubnoteFor = null;
   let searchQuery = '';
@@ -1005,6 +1115,7 @@
   const todayProgressFill = document.getElementById('today-progress-fill');
   const todayProgressText = document.getElementById('today-progress-text');
   const themeToggle = document.getElementById('theme-toggle');
+  const langToggle = document.getElementById('lang-toggle');
   const exportBtn = document.getElementById('export-btn');
   const importBtn = document.getElementById('import-btn');
   const importFile = document.getElementById('import-file');
@@ -1015,9 +1126,6 @@
   const sidebarToggle = document.getElementById('sidebar-toggle');
   const sidebarClose = document.getElementById('sidebar-close');
   const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-  todayDisplay.textContent = formatDateLabel(TODAY);
-  todayLabel.textContent = formatDateShort(TODAY);
 
   // --- Mobile sidebar toggle ---
   function openSidebar() { document.body.classList.add('sidebar-open'); }
@@ -1030,7 +1138,7 @@
   // --- Theme ---
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    themeToggle.textContent = theme === 'dark' ? '☀️ Light mode' : '🌙 Dark mode';
+    themeToggle.textContent = theme === 'dark' ? t().lightMode : t().darkMode;
   }
   let currentTheme = localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
   applyTheme(currentTheme);
@@ -1038,6 +1146,60 @@
     currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
     localStorage.setItem(THEME_KEY, currentTheme);
     applyTheme(currentTheme);
+  });
+
+  // --- Language ---
+  function applyLang() {
+    document.documentElement.setAttribute('lang', currentLang === 'th' ? 'th' : 'en');
+    const tr = t();
+    document.getElementById('brand-label').textContent = tr.brand;
+    focusInputBtn.textContent = tr.newEntry;
+    searchInput.placeholder = tr.searchPlaceholder;
+    document.getElementById('filter-opt-all').textContent = tr.filterAll;
+    document.getElementById('filter-opt-task').textContent = tr.filterTask;
+    document.getElementById('filter-opt-event').textContent = tr.filterEvent;
+    document.getElementById('filter-opt-note').textContent = tr.filterNote;
+    document.getElementById('filter-opt-important').textContent = tr.filterImportant;
+    document.getElementById('history-label').textContent = tr.history;
+    themeToggle.textContent = currentTheme === 'dark' ? tr.lightMode : tr.darkMode;
+    themeToggle.title = tr.toggleDarkMode;
+    langToggle.textContent = tr.langToggle;
+    langToggle.title = tr.toggleLang;
+    exportBtn.textContent = tr.exportBtn;
+    exportBtn.title = tr.exportTitle;
+    importBtn.textContent = tr.importBtn;
+    importBtn.title = tr.importTitle;
+    sidebarClose.title = tr.closeSidebar;
+    sidebarToggle.title = tr.openSidebar;
+    document.getElementById('task-board-label').textContent = tr.taskBoard;
+    document.getElementById('today-entries-label').textContent = tr.todayEntries;
+    document.getElementById('incomplete-label').textContent = tr.incompleteTasks;
+    document.getElementById('incomplete-badge').textContent = tr.fromPreviousDays;
+    document.getElementById('migrated-label').textContent = tr.migratedTasks;
+    input.placeholder = tr.entryPlaceholder;
+    dueDateInput.title = tr.dueDateOptional;
+    document.getElementById('add-btn').title = tr.addEntryTitle;
+    typeSelect.querySelector('[data-type="task"]').title = tr.typeTask;
+    typeSelect.querySelector('[data-type="event"]').title = tr.typeEvent;
+    typeSelect.querySelector('[data-type="note"]').title = tr.typeNote;
+    document.getElementById('legend').innerHTML =
+      '<span>' + tr.legendTask + '</span>' +
+      '<span>' + tr.legendEvent + '</span>' +
+      '<span>' + tr.legendNote + '</span>' +
+      '<span>' + tr.legendImportant + '</span>' +
+      '<span>' + tr.legendCancel + '</span>' +
+      '<span>' + tr.legendDrag + '</span>' +
+      '<span>' + tr.legendDue + '</span>' +
+      '<span>' + tr.legendEdit + '</span>';
+    todayDisplay.textContent = formatDateLabel(TODAY);
+    todayLabel.textContent = formatDateShort(TODAY);
+  }
+  applyLang();
+  langToggle.addEventListener('click', () => {
+    currentLang = currentLang === 'th' ? 'en' : 'th';
+    localStorage.setItem(LANG_KEY, currentLang);
+    applyLang();
+    render();
   });
 
   // --- Export / Import ---
@@ -1063,13 +1225,13 @@
       try {
         const parsed = JSON.parse(reader.result);
         if (!Array.isArray(parsed)) throw new Error('not an array');
-        if (!confirm('Importing will replace all current entries. Continue?')) return;
+        if (!confirm(t().importConfirm)) return;
         entries = parsed.map(normalizeEntry);
         saveEntries(entries);
         addingSubnoteFor = null;
         render();
       } catch (err) {
-        alert('Import failed: the selected file is not a valid Bullet Journal export.');
+        alert(t().importFailed);
       } finally {
         importFile.value = '';
       }
@@ -1156,9 +1318,7 @@
     const entry = entries.find(en => en.id === id);
     if (!entry) return;
     const hasChildren = entries.some(en => en.parentId === id);
-    const msg = hasChildren
-      ? 'Delete this entry and its sub-notes? This cannot be undone.'
-      : 'Delete this entry? This cannot be undone.';
+    const msg = hasChildren ? t().deleteConfirmWithChildren : t().deleteConfirm;
     if (!confirm(msg)) return;
     entries = entries.filter(en => en.id !== id && en.parentId !== id);
     saveEntries(entries);
@@ -1267,7 +1427,7 @@
     const inputEl = document.createElement('input');
     inputEl.type = 'text';
     inputEl.className = 'edit-input';
-    inputEl.placeholder = 'Sub-note...';
+    inputEl.placeholder = t().subnotePlaceholder;
     li.appendChild(inputEl);
 
     let settled = false;
@@ -1325,28 +1485,29 @@
     li.dataset.status = entry.status;
     if (draggable) li.draggable = true;
 
+    const tr = t();
     const bulletSymbol = entry.type === 'task' ? STATUS_SYMBOLS[entry.status] : BULLET_SYMBOLS[entry.type];
     const bulletTitle = entry.type === 'task'
-      ? 'Click to cycle status: incomplete → completed → migrated → scheduled'
-      : (entry.type === 'event' ? 'Event' : 'Note');
+      ? tr.cycleStatusTitle
+      : (entry.type === 'event' ? tr.eventTitle : tr.noteTitle);
 
-    const dragHandleHtml = draggable ? '<span class="drag-handle" title="Drag to reorder">⋮⋮</span>' : '';
+    const dragHandleHtml = draggable ? '<span class="drag-handle" title="' + escapeHtml(tr.legendDrag) + '">⋮⋮</span>' : '';
     const dueBadgeHtml = renderDueBadgeHtml(entry.dueDate);
-    const dueAddBtnHtml = !entry.dueDate ? '<button type="button" class="icon-btn due-add-btn" title="Set due date">📅</button>' : '';
+    const dueAddBtnHtml = !entry.dueDate ? '<button type="button" class="icon-btn due-add-btn" title="' + escapeHtml(tr.setDueDate) + '">📅</button>' : '';
     const dateChipHtml = opts.showDateChip ? '<span class="date-chip">' + escapeHtml(formatDateShort(entry.date)) + '</span>' : '';
 
     li.innerHTML =
       dragHandleHtml +
       '<span class="bullet-mark ' + entry.type + (entry.type === 'task' ? ' clickable' : '') + '" title="' + escapeHtml(bulletTitle) + '">' + bulletSymbol + '</span>' +
-      '<span class="entry-text" title="Double-click to edit">' + escapeHtml(entry.text) + '</span>' +
+      '<span class="entry-text" title="' + escapeHtml(tr.editTitle) + '">' + escapeHtml(entry.text) + '</span>' +
       dueBadgeHtml +
       dateChipHtml +
-      '<button type="button" class="star-btn' + (entry.important ? ' active' : '') + '" title="' + (entry.important ? 'Unmark important' : 'Mark important') + '">' + (entry.important ? '★' : '☆') + '</button>' +
+      '<button type="button" class="star-btn' + (entry.important ? ' active' : '') + '" title="' + (entry.important ? escapeHtml(tr.unmarkImportant) : escapeHtml(tr.markImportant)) + '">' + (entry.important ? '★' : '☆') + '</button>' +
       '<span class="actions">' +
         dueAddBtnHtml +
-        '<button type="button" class="icon-btn cancel-btn' + (entry.cancelled ? ' active' : '') + '" title="' + (entry.cancelled ? 'Uncancel entry' : 'Cancel entry') + '">⊘</button>' +
-        (isTopLevel ? '<button type="button" class="icon-btn sub-btn" title="Add sub-note">+</button>' : '') +
-        '<button type="button" class="icon-btn delete-btn" title="Delete">✕</button>' +
+        '<button type="button" class="icon-btn cancel-btn' + (entry.cancelled ? ' active' : '') + '" title="' + (entry.cancelled ? escapeHtml(tr.uncancelEntry) : escapeHtml(tr.cancelEntry)) + '">⊘</button>' +
+        (isTopLevel ? '<button type="button" class="icon-btn sub-btn" title="' + escapeHtml(tr.addSubnote) + '">+</button>' : '') +
+        '<button type="button" class="icon-btn delete-btn" title="' + escapeHtml(tr.deleteTitle) + '">✕</button>' +
       '</span>';
 
     if (entry.type === 'task') {
@@ -1502,7 +1663,7 @@
     todayList.innerHTML = '';
     const todayTopCount = entries.filter(en => en.date === TODAY && !en.parentId).length;
     if (todayTopCount === 0) {
-      renderEmpty(todayList, 'No entries yet today. Add one below.');
+      renderEmpty(todayList, t().noEntriesToday);
     } else {
       buildFlatSection('today', en => en.date === TODAY, { draggable: true }).forEach(li => todayList.appendChild(li));
     }
@@ -1514,8 +1675,8 @@
     const pct = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
     todayProgressFill.style.width = pct + '%';
     todayProgressText.textContent = totalCount
-      ? completedCount + ' / ' + totalCount + ' tasks completed (' + pct + '%)'
-      : 'No tasks yet today';
+      ? t().tasksCompleted(completedCount, totalCount, pct)
+      : t().noTasksToday;
     todayProgressWrap.classList.toggle('empty', totalCount === 0);
 
     // ----- Incomplete Tasks (previous days, still open) -----
@@ -1526,7 +1687,7 @@
       { showDateChip: true, draggable: true }
     );
     if (incompleteEls.length === 0) {
-      renderEmpty(incompleteList, "You're all caught up — no incomplete tasks from previous days.");
+      renderEmpty(incompleteList, t().allCaughtUp);
     } else {
       incompleteEls.forEach(li => incompleteList.appendChild(li));
     }
@@ -1539,7 +1700,7 @@
       { showDateChip: true, draggable: true }
     );
     if (migratedEls.length === 0) {
-      renderEmpty(migratedList, 'No migrated or scheduled tasks.');
+      renderEmpty(migratedList, t().noMigrated);
     } else {
       migratedEls.forEach(li => migratedList.appendChild(li));
     }
@@ -1554,7 +1715,7 @@
     if (pastDates.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'empty-state';
-      empty.textContent = 'No past entries yet.';
+      empty.textContent = t().noPastEntries;
       historyContainer.appendChild(empty);
       return;
     }
@@ -1580,8 +1741,8 @@
       const countSpan = document.createElement('span');
       countSpan.className = 'count';
       countSpan.textContent = activeFilter
-        ? elements.length + ' match' + (elements.length === 1 ? '' : 'es')
-        : dayEntries.length + (dayEntries.length === 1 ? ' entry' : ' entries');
+        ? t().matchCount(elements.length)
+        : t().entryCount(dayEntries.length);
       row.appendChild(labelSpan);
       row.appendChild(countSpan);
       summary.appendChild(row);
@@ -1592,7 +1753,7 @@
       if (importantOnes.length === 0) {
         const none = document.createElement('div');
         none.className = 'imp-chip none';
-        none.textContent = 'No important entries';
+        none.textContent = t().noImportantEntries;
         preview.appendChild(none);
       } else {
         importantOnes.slice(0, 4).forEach(en => {
@@ -1604,7 +1765,7 @@
         if (importantOnes.length > 4) {
           const more = document.createElement('div');
           more.className = 'imp-chip none';
-          more.textContent = '+' + (importantOnes.length - 4) + ' more';
+          more.textContent = t().moreCount(importantOnes.length - 4);
           preview.appendChild(more);
         }
       }
@@ -1622,7 +1783,7 @@
     if (!anyDayRendered) {
       const empty = document.createElement('p');
       empty.className = 'empty-state';
-      empty.textContent = 'No past entries match your search.';
+      empty.textContent = t().noPastMatch;
       historyContainer.appendChild(empty);
     }
   }
