@@ -117,19 +117,19 @@
 
   /* ---------- Sidebar ---------- */
   .sidebar {
-    width: 280px;
+    width: 304px;
     flex-shrink: 0;
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     height: 100%;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, border-color 0.2s, width 0.2s;
   }
 
   .sidebar-top {
     flex-shrink: 0;
-    padding: 16px 14px 10px;
+    padding: 20px 16px 14px;
     border-bottom: 1px solid var(--border);
   }
 
@@ -141,7 +141,7 @@
   }
 
   .sidebar-brand h1 {
-    font-size: 1.15rem;
+    font-size: 1.08rem;
     font-weight: 700;
     margin: 0;
     letter-spacing: -0.02em;
@@ -154,8 +154,8 @@
     width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 9px 12px;
+    border-radius: 12px;
+    padding: 11px 13px;
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--text);
@@ -164,10 +164,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
   }
 
-  .new-entry-btn:hover { background: var(--hover); }
+  .new-entry-btn:hover { background: var(--surface); border-color: var(--accent); }
   .new-entry-btn:active { transform: scale(0.98); }
 
   .sidebar-search {
@@ -195,7 +196,7 @@
   .sidebar-history {
     flex: 1;
     overflow-y: auto;
-    padding: 8px 10px 14px;
+    padding: 12px 12px 18px;
     background-image: radial-gradient(var(--dot) 1px, transparent 1px);
     background-size: 20px 20px;
   }
@@ -211,7 +212,7 @@
 
   .sidebar-bottom {
     flex-shrink: 0;
-    padding: 12px 14px;
+    padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -245,15 +246,15 @@
 
   /* ---------- History day groups ---------- */
   .history-day {
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     border-radius: 10px;
     overflow: hidden;
   }
 
   .history-day summary {
     cursor: pointer;
-    padding: 9px 8px;
-    border-radius: 10px;
+    padding: 10px 10px;
+    border-radius: 12px;
     list-style: none;
     transition: background 0.15s;
   }
@@ -337,7 +338,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 14px 24px;
+    padding: 18px clamp(24px, 5vw, 64px);
     border-bottom: 1px solid var(--border);
   }
 
@@ -354,8 +355,9 @@
   .icon-btn-plain:hover { background: var(--hover); }
 
   .main-topbar-date {
-    font-weight: 600;
-    font-size: 1rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
   }
 
   .main-topbar-date .sub {
@@ -368,21 +370,21 @@
   .board-scroll {
     flex: 1;
     overflow-y: auto;
-    padding: 24px;
-    max-width: 900px;
+    padding: 38px clamp(28px, 6vw, 88px);
+    max-width: 1080px;
     width: 100%;
     margin: 0 auto;
-    background-image: radial-gradient(var(--dot) 1.1px, transparent 1.1px);
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
     background-size: 22px 22px;
     background-position: 6px 6px;
   }
 
   .board-section {
-    margin-bottom: 28px;
+    margin-bottom: 38px;
   }
 
   .board-section h2 {
-    font-size: 1rem;
+    font-size: 1.04rem;
     font-weight: 700;
     margin: 0 0 10px;
     display: flex;
@@ -403,11 +405,40 @@
   }
 
   .board-card {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .board-card .entry-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .board-card .entry-item {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 8px 16px;
+    border-radius: 18px;
+    margin: 0;
+    padding: 13px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 7px 20px rgba(0,0,0,0.025);
+  }
+
+  .board-card .entry-item:last-child { border-bottom: 1px solid var(--border); }
+
+  .board-card .entry-item:hover {
+    background: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  .board-card .entry-item.sub-entry {
+    margin: -4px 0 0 28px;
+    border-radius: 14px;
+    background: var(--surface-inset);
+    box-shadow: none;
+    padding: 10px 14px;
   }
 
   /* ---------- Daily progress bar ---------- */
@@ -459,10 +490,12 @@
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 8px 8px;
-    padding: 10px 4px;
+    padding: 11px 4px;
     border-bottom: 1px solid var(--border);
-    transition: box-shadow 0.1s, opacity 0.15s;
+    transition: background 0.15s, box-shadow 0.1s, opacity 0.15s;
   }
+
+  .entry-item:hover { background: var(--surface-inset); border-radius: 8px; }
 
   .entry-item:last-child { border-bottom: none; }
 
@@ -715,27 +748,27 @@
   /* ---------- Composer (ChatGPT-style input) ---------- */
   .composer-wrap {
     flex-shrink: 0;
-    padding: 10px 24px calc(22px + env(safe-area-inset-bottom));
+    padding: 14px clamp(24px, 5vw, 64px) calc(22px + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     align-items: center;
     position: sticky;
     bottom: 0;
-    background: var(--bg);
+    background: linear-gradient(to bottom, transparent, var(--bg) 28%);
     z-index: 10;
   }
 
   .composer {
     width: 100%;
-    max-width: 760px;
+    max-width: 900px;
     display: flex;
     align-items: center;
     gap: 8px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 28px;
-    box-shadow: var(--shadow-lg);
-    padding: 8px 8px 8px 10px;
+    border-radius: 18px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.03);
+    padding: 9px 10px;
   }
 
   /* ---------- Collapsible type picker (popover) ---------- */
@@ -929,7 +962,13 @@
     justify-content: center;
     margin-top: 10px;
     flex-wrap: wrap;
-    max-width: 760px;
+    max-width: 900px;
+  }
+
+  @media (min-width: 861px) {
+    .quick-filters { display: flex; padding: 10px clamp(24px, 5vw, 64px) 0; }
+    .quick-filter { min-height: 34px; font-size: 0.76rem; }
+    .board-scroll[data-board-view="important"] .board-section { display: block; }
   }
 
   .legend span { display: flex; align-items: center; gap: 4px; }
