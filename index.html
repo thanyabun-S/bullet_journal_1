@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  (function () {
+    try {
+      if (localStorage.getItem('bulletJournalTheme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch (e) {}
+  })();
+</script>
+<title>Bullet Journal</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e6e3dd;
+    --text: #2b2924;
+    --text-muted: #8a8578;
+    --accent: #3d5a4c;
+    --accent-light: #eef2ef;
+    --task-color: #3d5a4c;
+    --event-color: #a35d3a;
+    --note-color: #6b6355;
+    --important: #b8860b;
+    --important-bg: #fdf6e0;
+    --danger: #b3413e;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #1c1b19;
+    --surface: #262421;
+    --border: #3a372f;
+    --text: #ece7dc;
+    --text-muted: #9b968a;
+    --accent: #6fae8f;
+    --accent-light: #223129;
+    --task-color: #6fae8f;
+    --event-color: #d68a5c;
+    --note-color: #a8a190;
+    --important: #e8c468;
+    --important-bg: #332c17;
+    --danger: #d9776f;
+    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 4px 14px rgba(0,0,0,0.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .header-actions button {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .header-actions button:hover { background: var(--accent-light); }
+
+  #theme-toggle { font-size: 0.95rem; padding: 6px 10px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 24px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .card h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card h2 .date-label {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .entry-form {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .type-select {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .type-select button {
+    background: var(--surface);
+    border: none;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-muted);
+    border-right: 1px solid var(--border);
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .type-select button:last-child { border-right: none; }
+
+  .type-select button.active {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  #entry-input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  #entry-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  #add-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0 18px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  #add-btn:hover { opacity: 0.88; }
+
+  .entry-list {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+  }
+
+  .entry-list:empty { margin: 0; }
+
+  .entry-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .entry-item:last-child { border-bottom: none; }
+
+  .entry-item.sub-entry {
+    padding-left: 30px;
+    font-size: 0.9rem;
+  }
+
+  .entry-item.sub-entry .bullet-mark {
+    color: var(--note-color);
+    font-size: 0.85rem;
+  }
+
+  .entry-item.important {
+    background: var(--important-bg);
+    border-radius: 6px;
+  }
+
+  .entry-item.important .entry-text {
+    font-weight: 600;
+  }
+
+  .entry-item.important .bullet-mark {
+    color: var(--important);
+  }
+
+  .bullet-mark {
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.5;
+    user-select: none;
+    cursor: default;
+    opacity: 0.9;
+  }
+
+  .bullet-mark.clickable {
+    cursor: pointer;
+    opacity: 1;
+  }
+
+  .bullet-mark.task { color: var(--task-color); }
+  .bullet-mark.event { color: var(--event-color); }
+  .bullet-mark.note { color: var(--note-color); }
+
+  .entry-text {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-break: break-word;
+    cursor: text;
+  }
+
+  .entry-item.completed .entry-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+
+  .entry-item.cancelled .entry-text {
+    text-decoration: line-through;
+    opacity: 0.55;
+  }
+
+  .entry-item[data-status="migrated"] .entry-text { color: var(--event-color); }
+  .entry-item[data-status="scheduled"] .entry-text { color: var(--accent); }
+
+  .edit-input {
+    flex: 1;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .edit-input:focus { outline: none; }
+
+  .star-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    opacity: 0.45;
+    padding: 0 2px;
+    transition: opacity 0.15s;
+  }
+
+  .star-btn.active { color: var(--important); opacity: 1; }
+  .entry-item:hover .star-btn { opacity: 1; }
+
+  .actions {
+    display: flex;
+    gap: 2px;
+    margin-left: auto;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .entry-item:hover .actions { opacity: 1; }
+
+  .icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 0 4px;
+  }
+
+  .icon-btn.cancel-btn.active { color: var(--danger); }
+  .icon-btn.delete-btn:hover { color: var(--danger); }
+
+  .subnote-input-row {
+    padding-left: 30px;
+    border-bottom: none;
+  }
+
+  .empty-state {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+    padding: 8px 4px;
+  }
+
+  .search-filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  #search-input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  #search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  #filter-select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .history-day {
+    margin-bottom: 4px;
+  }
+
+  .history-day summary {
+    cursor: pointer;
+    padding: 10px 4px;
+    font-weight: 500;
+    font-size: 0.92rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+  }
+
+  .history-day summary::-webkit-details-marker { display: none; }
+
+  .history-day summary::after {
+    content: "›";
+    transform: rotate(90deg);
+    transition: transform 0.15s;
+    color: var(--text-muted);
+  }
+
+  .history-day[open] summary::after {
+    transform: rotate(270deg);
+  }
+
+  .history-day summary .count {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.8rem;
+  }
+
+  .history-day .entry-list {
+    padding-left: 4px;
+    margin-top: 4px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    justify-content: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .legend span { display: flex; align-items: center; gap: 4px; }
+
+  .legend-hint {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Bullet Journal</h1>
+    <p id="today-display"></p>
+    <div class="header-actions">
+      <button type="button" id="theme-toggle" title="Toggle dark mode">🌙</button>
+      <button type="button" id="export-btn" title="Download entries as JSON">⬇ Export JSON</button>
+      <button type="button" id="import-btn" title="Restore entries from JSON">⬆ Import JSON</button>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2>Add an entry</h2>
+    <form class="entry-form" id="entry-form">
+      <div class="type-select" id="type-select">
+        <button type="button" data-type="task" class="active" title="Task">•</button>
+        <button type="button" data-type="event" title="Event">○</button>
+        <button type="button" data-type="note" title="Note">–</button>
+      </div>
+      <input type="text" id="entry-input" placeholder="What's on your mind?" autocomplete="off">
+      <button type="submit" id="add-btn">Add</button>
+    </form>
+    <div class="legend">
+      <span>• task</span>
+      <span>○ event</span>
+      <span>– note</span>
+      <span>☆ important</span>
+      <span>⊘ cancel</span>
+    </div>
+    <p class="legend-hint">Click a task's bullet to cycle: • incomplete → ✔ completed → &gt; migrated → &lt; scheduled. Double-click any entry's text to edit it.</p>
+  </section>
+
+  <section class="card">
+    <h2>Today <span class="date-label" id="today-label"></span></h2>
+    <ul class="entry-list" id="today-list"></ul>
+  </section>
+
+  <section class="card">
+    <h2>History</h2>
+    <div class="search-filter-bar">
+      <input type="text" id="search-input" placeholder="Search past entries...">
+      <select id="filter-select">
+        <option value="all">All</option>
+        <option value="task">Tasks</option>
+        <option value="event">Events</option>
+        <option value="note">Notes</option>
+        <option value="important">Important</option>
+      </select>
+    </div>
+    <div id="history-container"></div>
+  </section>
+</div>
+
+<script>
+  const STORAGE_KEY = 'bulletJournalEntries';
+  const THEME_KEY = 'bulletJournalTheme';
+  const BULLET_SYMBOLS = { event: '○', note: '–' };
+  const STATUS_ORDER = ['incomplete', 'completed', 'migrated', 'scheduled'];
+  const STATUS_SYMBOLS = { incomplete: '•', completed: '✔', migrated: '>', scheduled: '<' };
+
+  function genId() {
+    return Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  }
+
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function formatDateLabel(dateKey) {
+    const [y, m, d] = dateKey.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    return date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function normalizeEntry(e) {
+    return {
+      id: e.id || genId(),
+      text: e.text || '',
+      type: (e.type === 'task' || e.type === 'event' || e.type === 'note') ? e.type : 'note',
+      date: e.date || todayKey(),
+      status: STATUS_ORDER.includes(e.status) ? e.status : (e.completed ? 'completed' : 'incomplete'),
+      cancelled: !!e.cancelled,
+      important: !!e.important,
+      parentId: e.parentId || null
+    };
+  }
+
+  function loadEntries() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      return raw.map(normalizeEntry);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveEntries(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  let entries = loadEntries();
+  let selectedType = 'task';
+  let addingSubnoteFor = null;
+  let searchQuery = '';
+  let filterType = 'all';
+  const TODAY = todayKey();
+
+  const form = document.getElementById('entry-form');
+  const input = document.getElementById('entry-input');
+  const typeSelect = document.getElementById('type-select');
+  const todayList = document.getElementById('today-list');
+  const historyContainer = document.getElementById('history-container');
+  const todayDisplay = document.getElementById('today-display');
+  const todayLabel = document.getElementById('today-label');
+  const themeToggle = document.getElementById('theme-toggle');
+  const exportBtn = document.getElementById('export-btn');
+  const importBtn = document.getElementById('import-btn');
+  const importFile = document.getElementById('import-file');
+  const searchInput = document.getElementById('search-input');
+  const filterSelect = document.getElementById('filter-select');
+
+  todayDisplay.textContent = formatDateLabel(TODAY);
+  todayLabel.textContent = '(' + formatDateLabel(TODAY) + ')';
+
+  // --- Theme ---
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+  let currentTheme = localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
+  applyTheme(currentTheme);
+  themeToggle.addEventListener('click', () => {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, currentTheme);
+    applyTheme(currentTheme);
+  });
+
+  // --- Export / Import ---
+  exportBtn.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bullet-journal-export-' + TODAY + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  importBtn.addEventListener('click', () => importFile.click());
+
+  importFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!Array.isArray(parsed)) throw new Error('not an array');
+        if (!confirm('Importing will replace all current entries. Continue?')) return;
+        entries = parsed.map(normalizeEntry);
+        saveEntries(entries);
+        addingSubnoteFor = null;
+        render();
+      } catch (err) {
+        alert('Import failed: the selected file is not a valid Bullet Journal export.');
+      } finally {
+        importFile.value = '';
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // --- Search / Filter ---
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    render();
+  });
+  filterSelect.addEventListener('change', () => {
+    filterType = filterSelect.value;
+    render();
+  });
+
+  function matchesFilter(entry) {
+    if (filterType === 'important' && !entry.important) return false;
+    if (filterType !== 'all' && filterType !== 'important' && entry.type !== filterType) return false;
+    if (searchQuery && !entry.text.toLowerCase().includes(searchQuery)) return false;
+    return true;
+  }
+
+  // --- Type selector ---
+  typeSelect.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    selectedType = btn.dataset.type;
+    typeSelect.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+  });
+
+  // --- Add entry ---
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    entries.push({
+      id: genId(),
+      text,
+      type: selectedType,
+      date: TODAY,
+      status: 'incomplete',
+      cancelled: false,
+      important: false,
+      parentId: null
+    });
+    saveEntries(entries);
+    input.value = '';
+    render();
+    input.focus();
+  });
+
+  // --- Mutations ---
+  function cycleStatus(id) {
+    const entry = entries.find(en => en.id === id);
+    if (!entry || entry.type !== 'task') return;
+    const idx = STATUS_ORDER.indexOf(entry.status);
+    entry.status = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length];
+    saveEntries(entries);
+    render();
+  }
+
+  function toggleImportant(id) {
+    const entry = entries.find(en => en.id === id);
+    if (!entry) return;
+    entry.important = !entry.important;
+    saveEntries(entries);
+    render();
+  }
+
+  function toggleCancelled(id) {
+    const entry = entries.find(en => en.id === id);
+    if (!entry) return;
+    entry.cancelled = !entry.cancelled;
+    saveEntries(entries);
+    render();
+  }
+
+  function deleteEntry(id) {
+    const entry = entries.find(en => en.id === id);
+    if (!entry) return;
+    const hasChildren = entries.some(en => en.parentId === id);
+    const msg = hasChildren
+      ? 'Delete this entry and its sub-notes? This cannot be undone.'
+      : 'Delete this entry? This cannot be undone.';
+    if (!confirm(msg)) return;
+    entries = entries.filter(en => en.id !== id && en.parentId !== id);
+    saveEntries(entries);
+    render();
+  }
+
+  function commitEdit(entry, newText) {
+    const val = newText.trim();
+    if (val) entry.text = val;
+    saveEntries(entries);
+    render();
+  }
+
+  function startEdit(li, entry) {
+    const textSpan = li.querySelector('.entry-text');
+    if (!textSpan) return;
+    const inputEl = document.createElement('input');
+    inputEl.type = 'text';
+    inputEl.className = 'edit-input';
+    inputEl.value = entry.text;
+    textSpan.replaceWith(inputEl);
+    inputEl.focus();
+    inputEl.select();
+
+    let settled = false;
+    const commit = () => {
+      if (settled) return;
+      settled = true;
+      commitEdit(entry, inputEl.value);
+    };
+    const cancelEdit = () => {
+      if (settled) return;
+      settled = true;
+      render();
+    };
+
+    inputEl.addEventListener('blur', commit);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); inputEl.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    });
+  }
+
+  function createSubnoteInputRow(parentEntry) {
+    const li = document.createElement('li');
+    li.className = 'entry-item subnote-input-row';
+    const inputEl = document.createElement('input');
+    inputEl.type = 'text';
+    inputEl.className = 'edit-input';
+    inputEl.placeholder = 'Sub-note...';
+    li.appendChild(inputEl);
+
+    let settled = false;
+    const commit = () => {
+      if (settled) return;
+      settled = true;
+      const val = inputEl.value.trim();
+      if (val) {
+        entries.push({
+          id: genId(),
+          text: val,
+          type: 'note',
+          date: parentEntry.date,
+          status: 'incomplete',
+          cancelled: false,
+          important: false,
+          parentId: parentEntry.id
+        });
+        saveEntries(entries);
+      }
+      addingSubnoteFor = null;
+      render();
+    };
+    const cancelAdd = () => {
+      if (settled) return;
+      settled = true;
+      addingSubnoteFor = null;
+      render();
+    };
+
+    inputEl.addEventListener('blur', commit);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); inputEl.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelAdd(); }
+    });
+
+    requestAnimationFrame(() => inputEl.focus());
+    return li;
+  }
+
+  function createEntryItem(entry) {
+    const li = document.createElement('li');
+    li.className = 'entry-item';
+    if (entry.status === 'completed') li.classList.add('completed');
+    if (entry.cancelled) li.classList.add('cancelled');
+    if (entry.important) li.classList.add('important');
+    if (entry.parentId) li.classList.add('sub-entry');
+    li.dataset.status = entry.status;
+
+    const bullet = document.createElement('span');
+    bullet.className = 'bullet-mark ' + entry.type;
+    if (entry.type === 'task') {
+      bullet.textContent = STATUS_SYMBOLS[entry.status];
+      bullet.classList.add('clickable');
+      bullet.title = 'Click to cycle status: incomplete → completed → migrated → scheduled';
+      bullet.addEventListener('click', () => cycleStatus(entry.id));
+    } else {
+      bullet.textContent = BULLET_SYMBOLS[entry.type];
+      bullet.title = entry.type === 'event' ? 'Event' : 'Note';
+    }
+
+    const text = document.createElement('span');
+    text.className = 'entry-text';
+    text.textContent = entry.text;
+    text.title = 'Double-click to edit';
+    text.addEventListener('dblclick', () => startEdit(li, entry));
+
+    const starBtn = document.createElement('button');
+    starBtn.type = 'button';
+    starBtn.className = 'star-btn' + (entry.important ? ' active' : '');
+    starBtn.textContent = entry.important ? '★' : '☆';
+    starBtn.title = entry.important ? 'Unmark important' : 'Mark important';
+    starBtn.addEventListener('click', () => toggleImportant(entry.id));
+
+    const actions = document.createElement('span');
+    actions.className = 'actions';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'icon-btn cancel-btn' + (entry.cancelled ? ' active' : '');
+    cancelBtn.textContent = '⊘';
+    cancelBtn.title = entry.cancelled ? 'Uncancel entry' : 'Cancel entry';
+    cancelBtn.addEventListener('click', () => toggleCancelled(entry.id));
+    actions.appendChild(cancelBtn);
+
+    if (!entry.parentId) {
+      const subBtn = document.createElement('button');
+      subBtn.type = 'button';
+      subBtn.className = 'icon-btn sub-btn';
+      subBtn.textContent = '+';
+      subBtn.title = 'Add sub-note';
+      subBtn.addEventListener('click', () => {
+        addingSubnoteFor = addingSubnoteFor === entry.id ? null : entry.id;
+        render();
+      });
+      actions.appendChild(subBtn);
+    }
+
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'icon-btn delete-btn';
+    del.textContent = '✕';
+    del.title = 'Delete';
+    del.addEventListener('click', () => deleteEntry(entry.id));
+    actions.appendChild(del);
+
+    li.appendChild(bullet);
+    li.appendChild(text);
+    li.appendChild(starBtn);
+    li.appendChild(actions);
+    return li;
+  }
+
+  function buildEntryListElements(dayEntries, applyFilter) {
+    const topEntries = dayEntries.filter(en => !en.parentId);
+    const childEntries = dayEntries.filter(en => en.parentId);
+    const activeFilter = applyFilter && (searchQuery !== '' || filterType !== 'all');
+
+    let topToShow = topEntries;
+    if (activeFilter) {
+      topToShow = topEntries.filter(top =>
+        matchesFilter(top) || childEntries.some(c => c.parentId === top.id && matchesFilter(c))
+      );
+    }
+
+    const elements = [];
+    topToShow.forEach(top => {
+      elements.push(createEntryItem(top));
+      let kids = childEntries.filter(c => c.parentId === top.id);
+      if (activeFilter) kids = kids.filter(matchesFilter);
+      kids.forEach(k => elements.push(createEntryItem(k)));
+      if (addingSubnoteFor === top.id) elements.push(createSubnoteInputRow(top));
+    });
+    return elements;
+  }
+
+  function render() {
+    // Today
+    todayList.innerHTML = '';
+    const todays = entries.filter(en => en.date === TODAY);
+    const todayTop = todays.filter(en => !en.parentId);
+    if (todayTop.length === 0) {
+      const empty = document.createElement('li');
+      empty.className = 'empty-state';
+      empty.textContent = 'No entries yet today. Add one above.';
+      todayList.appendChild(empty);
+    } else {
+      buildEntryListElements(todays, false).forEach(li => todayList.appendChild(li));
+    }
+
+    // History
+    historyContainer.innerHTML = '';
+    const pastDates = [...new Set(entries.filter(en => en.date !== TODAY).map(en => en.date))]
+      .sort((a, b) => b.localeCompare(a));
+
+    const activeFilter = searchQuery !== '' || filterType !== 'all';
+
+    if (pastDates.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-state';
+      empty.textContent = 'No past entries yet.';
+      historyContainer.appendChild(empty);
+      return;
+    }
+
+    let anyDayRendered = false;
+    pastDates.forEach(dateKey => {
+      const dayEntries = entries.filter(en => en.date === dateKey);
+      const elements = buildEntryListElements(dayEntries, true);
+      if (activeFilter && elements.length === 0) return;
+
+      anyDayRendered = true;
+      const details = document.createElement('details');
+      details.className = 'history-day';
+      details.open = activeFilter;
+
+      const summary = document.createElement('summary');
+      const labelSpan = document.createElement('span');
+      labelSpan.textContent = formatDateLabel(dateKey);
+      const countSpan = document.createElement('span');
+      countSpan.className = 'count';
+      countSpan.textContent = activeFilter
+        ? elements.length + ' match' + (elements.length === 1 ? '' : 'es')
+        : dayEntries.length + (dayEntries.length === 1 ? ' entry' : ' entries');
+      summary.appendChild(labelSpan);
+      summary.appendChild(countSpan);
+
+      const list = document.createElement('ul');
+      list.className = 'entry-list';
+      elements.forEach(li => list.appendChild(li));
+
+      details.appendChild(summary);
+      details.appendChild(list);
+      historyContainer.appendChild(details);
+    });
+
+    if (!anyDayRendered) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-state';
+      empty.textContent = 'No past entries match your search.';
+      historyContainer.appendChild(empty);
+    }
+  }
+
+  render();
+</script>
+</body>
+</html>
