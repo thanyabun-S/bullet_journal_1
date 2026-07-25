@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script>
   (function () {
     try {
@@ -19,55 +19,59 @@
 <style>
   :root {
     color-scheme: light;
-    --bg: #FAFAFA;
-    --sidebar-bg: #F5F4F1;
+    --bg: #FAF8F3;
+    --sidebar-bg: #F1EDE3;
     --surface: #FFFFFF;
-    --surface-inset: #F2F1EE;
-    --border: #E8E6E1;
-    --text: #2b2924;
-    --text-muted: #8a8578;
-    --accent: #3d5a4c;
-    --accent-light: #eef2ef;
-    --task-color: #3d5a4c;
-    --event-color: #a35d3a;
-    --note-color: #6b6355;
-    --important: #b8860b;
-    --important-bg: #fdf6e0;
-    --danger: #b3413e;
-    --overdue: #c0392b;
-    --overdue-bg: #fdecea;
-    --due-today: #b5651d;
-    --due-today-bg: #fdf1e0;
-    --hover: rgba(0,0,0,0.05);
+    --surface-inset: #EFEAE0;
+    --border: #E3DECF;
+    --text: #2B2924;
+    --text-muted: #8C8574;
+    --accent: #33543D;
+    --accent-light: #E6EEE5;
+    --task-color: #33543D;
+    --event-color: #A15C39;
+    --note-color: #766B58;
+    --important: #AD7D0A;
+    --important-bg: #FBF3DC;
+    --danger: #AE4038;
+    --overdue: #BE3B2B;
+    --overdue-bg: #FBEAE7;
+    --due-today: #B5651D;
+    --due-today-bg: #FCF0DE;
+    --hover: rgba(43,41,36,0.06);
+    --dot: rgba(43,41,36,0.08);
     --radius: 14px;
-    --shadow: 0 1px 2px rgba(0,0,0,0.03), 0 3px 10px rgba(0,0,0,0.03);
-    --shadow-lg: 0 8px 28px rgba(0,0,0,0.08);
+    --radius-sm: 10px;
+    --shadow: 0 1px 2px rgba(43,41,36,0.04), 0 3px 10px rgba(43,41,36,0.04);
+    --shadow-lg: 0 10px 30px rgba(43,41,36,0.11);
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --bg: #171717;
-    --sidebar-bg: #131313;
-    --surface: #1f1f1f;
-    --surface-inset: #1b1b1b;
-    --border: #2c2c2c;
-    --text: #ece7dc;
-    --text-muted: #9b968a;
-    --accent: #6fae8f;
-    --accent-light: #223129;
-    --task-color: #6fae8f;
-    --event-color: #d68a5c;
-    --note-color: #a8a190;
-    --important: #e8c468;
-    --important-bg: #332c17;
-    --danger: #d9776f;
-    --overdue: #e57373;
-    --overdue-bg: #3a1f1f;
-    --due-today: #e0a458;
-    --due-today-bg: #3a2c14;
-    --hover: rgba(255,255,255,0.06);
+    --bg: #17181A;
+    --sidebar-bg: #121314;
+    --surface: #1E2020;
+    --surface-inset: #1A1B1B;
+    --border: #2B2C2C;
+    --text: #ECE7DC;
+    --text-muted: #9B968A;
+    --accent: #74B593;
+    --accent-light: #1F2B23;
+    --task-color: #74B593;
+    --event-color: #D68A5C;
+    --note-color: #ABA394;
+    --important: #E8C468;
+    --important-bg: #33291A;
+    --danger: #DD8079;
+    --overdue: #E57373;
+    --overdue-bg: #3A2020;
+    --due-today: #E0A458;
+    --due-today-bg: #3A2C14;
+    --hover: rgba(255,255,255,0.07);
+    --dot: rgba(255,255,255,0.055);
     --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 4px 14px rgba(0,0,0,0.3);
-    --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+    --shadow-lg: 0 10px 32px rgba(0,0,0,0.5);
   }
 
   * { box-sizing: border-box; }
@@ -83,6 +87,21 @@
 
   button, input, select {
     font-family: inherit;
+  }
+
+  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* ---------- App shell ---------- */
@@ -145,10 +164,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: background 0.15s;
+    transition: background 0.15s, transform 0.1s;
   }
 
   .new-entry-btn:hover { background: var(--hover); }
+  .new-entry-btn:active { transform: scale(0.98); }
 
   .sidebar-search {
     display: flex;
@@ -176,14 +196,17 @@
     flex: 1;
     overflow-y: auto;
     padding: 8px 10px 14px;
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 
   .sidebar-history-label {
     font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: var(--text-muted);
     padding: 8px 6px 6px;
+    font-weight: 600;
   }
 
   .sidebar-bottom {
@@ -209,7 +232,7 @@
     font-size: 0.78rem;
     color: var(--text);
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s, transform 0.1s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -218,6 +241,7 @@
   }
 
   .sidebar-btn:hover { background: var(--hover); }
+  .sidebar-btn:active { transform: scale(0.98); }
 
   /* ---------- History day groups ---------- */
   .history-day {
@@ -258,8 +282,9 @@
 
   .day-row .count {
     color: var(--text-muted);
-    font-weight: 400;
-    font-size: 0.72rem;
+    font-weight: 500;
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
   }
 
   .day-important-preview {
@@ -347,6 +372,9 @@
     max-width: 900px;
     width: 100%;
     margin: 0 auto;
+    background-image: radial-gradient(var(--dot) 1.1px, transparent 1.1px);
+    background-size: 22px 22px;
+    background-position: 6px 6px;
   }
 
   .board-section {
@@ -360,16 +388,18 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    letter-spacing: -0.01em;
   }
 
   .board-section h2 .section-badge {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 500;
     color: var(--text-muted);
     background: var(--surface-inset);
     border: 1px solid var(--border);
     border-radius: 999px;
     padding: 1px 9px;
+    font-family: var(--font-mono);
   }
 
   .board-card {
@@ -406,7 +436,9 @@
   }
 
   .progress-text {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
     color: var(--text-muted);
     white-space: nowrap;
     flex-shrink: 0;
@@ -461,6 +493,8 @@
   .entry-item.drag-over-top { box-shadow: inset 0 2px 0 0 var(--accent); }
   .entry-item.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--accent); }
 
+  /* Hidden interactive affordances: visually hidden AND non-interactive until
+     revealed by hover or keyboard focus, so they can't register "ghost" clicks. */
   .drag-handle {
     flex-shrink: 0;
     width: 16px;
@@ -471,10 +505,17 @@
     cursor: grab;
     user-select: none;
     opacity: 0;
+    pointer-events: none;
     transition: opacity 0.15s;
   }
 
-  .entry-item:hover .drag-handle { opacity: 1; }
+  .entry-item:hover .drag-handle,
+  .entry-item:focus-within .drag-handle,
+  .entry-item.mobile-actions-open .drag-handle {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .entry-item.dragging .drag-handle { cursor: grabbing; }
 
   .bullet-mark {
@@ -491,7 +532,10 @@
   .bullet-mark.clickable {
     cursor: pointer;
     opacity: 1;
+    transition: transform 0.1s;
   }
+
+  .bullet-mark.clickable:active { transform: scale(0.82); }
 
   .bullet-mark.task { color: var(--task-color); }
   .bullet-mark.event { color: var(--event-color); }
@@ -521,6 +565,8 @@
 
   .entry-item .date-chip {
     font-size: 0.68rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
     color: var(--text-muted);
     background: var(--surface-inset);
     border: 1px solid var(--border);
@@ -533,7 +579,8 @@
   .due-badge {
     flex-shrink: 0;
     font-size: 0.72rem;
-    font-weight: 500;
+    font-family: var(--font-mono);
+    font-weight: 600;
     border-radius: 999px;
     padding: 1px 9px;
     margin-top: 1px;
@@ -560,10 +607,16 @@
 
   .due-add-btn {
     opacity: 0;
+    pointer-events: none;
     transition: opacity 0.15s;
   }
 
-  .entry-item:hover .due-add-btn { opacity: 1; }
+  .entry-item:hover .due-add-btn,
+  .entry-item:focus-within .due-add-btn,
+  .entry-item.mobile-actions-open .due-add-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
   .edit-input, .edit-date-input {
     flex: 1;
@@ -588,12 +641,25 @@
     font-size: 0.95rem;
     color: var(--text-muted);
     opacity: 0;
+    pointer-events: none;
     padding: 0 2px;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, transform 0.1s;
   }
 
-  .star-btn.active { color: var(--important); opacity: 1; }
-  .entry-item:hover .star-btn { opacity: 1; }
+  .star-btn:active { transform: scale(0.8); }
+
+  .star-btn.active {
+    color: var(--important);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .entry-item:hover .star-btn,
+  .entry-item:focus-within .star-btn,
+  .entry-item.mobile-actions-open .star-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
   .actions {
     display: flex;
@@ -601,10 +667,16 @@
     margin-left: auto;
     flex-shrink: 0;
     opacity: 0;
+    pointer-events: none;
     transition: opacity 0.15s;
   }
 
-  .entry-item:hover .actions { opacity: 1; }
+  .entry-item:hover .actions,
+  .entry-item:focus-within .actions,
+  .entry-item.mobile-actions-open .actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
   .icon-btn {
     background: none;
@@ -613,10 +685,20 @@
     cursor: pointer;
     font-size: 0.95rem;
     padding: 0 4px;
+    transition: color 0.15s, transform 0.1s;
   }
+
+  .icon-btn:active { transform: scale(0.85); }
 
   .icon-btn.cancel-btn.active { color: var(--danger); }
   .icon-btn.delete-btn:hover { color: var(--danger); }
+
+  .entry-item.mobile-reordering {
+    background: var(--accent-light);
+    box-shadow: 0 0 0 2px var(--accent);
+    opacity: 0.72;
+    touch-action: none;
+  }
 
   .subnote-input-row {
     padding-left: 30px;
@@ -633,7 +715,7 @@
   /* ---------- Composer (ChatGPT-style input) ---------- */
   .composer-wrap {
     flex-shrink: 0;
-    padding: 10px 24px 22px;
+    padding: 10px 24px calc(22px + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -656,29 +738,89 @@
     padding: 8px 8px 8px 10px;
   }
 
-  .type-select {
-    display: flex;
-    border-radius: 20px;
-    overflow: hidden;
+  /* ---------- Collapsible type picker (popover) ---------- */
+  .type-picker {
+    position: relative;
     flex-shrink: 0;
-    background: var(--surface-inset);
   }
 
-  .type-select button {
-    background: transparent;
+  .type-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     border: none;
-    padding: 8px 12px;
+    background: var(--surface-inset);
+    color: var(--accent);
+    font-size: 1.15rem;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .type-toggle:hover { background: var(--hover); }
+  .type-toggle:active { transform: scale(0.92); }
+  .type-toggle[aria-expanded="true"] { background: var(--accent-light); }
+
+  .type-popover {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    padding: 6px;
+    min-width: 152px;
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+    transform-origin: bottom left;
+    pointer-events: none;
+    transition: opacity 0.14s ease, transform 0.14s ease;
+    z-index: 20;
+  }
+
+  .type-picker.open .type-popover {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .type-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 0.86rem;
+    color: var(--text);
+    text-align: left;
+    transition: background 0.12s;
+  }
+
+  .type-option:hover { background: var(--hover); }
+  .type-option.active { background: var(--accent-light); }
+  .type-option.active .opt-label { font-weight: 600; color: var(--accent); }
+
+  .type-option .opt-symbol {
+    width: 18px;
+    flex-shrink: 0;
+    text-align: center;
     font-size: 1rem;
     color: var(--text-muted);
-    transition: background 0.15s, color 0.15s;
   }
 
-  .type-select button.active {
-    background: var(--accent-light);
-    color: var(--accent);
-    border-radius: 20px;
-  }
+  .type-option[data-type="task"] .opt-symbol { color: var(--task-color); }
+  .type-option[data-type="event"] .opt-symbol { color: var(--event-color); }
+  .type-option[data-type="note"] .opt-symbol { color: var(--note-color); }
 
   #entry-input {
     flex: 1;
@@ -695,19 +837,70 @@
     outline: none;
   }
 
-  #due-date-input {
-    border: none;
-    background: var(--surface-inset);
-    border-radius: 20px;
-    padding: 8px 10px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-family: inherit;
+  /* ---------- Compact calendar-icon date picker ---------- */
+  .date-picker {
+    position: relative;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
-    max-width: 122px;
   }
 
-  #due-date-input:focus { outline: none; color: var(--text); }
+  .date-hidden-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .date-toggle {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-inset);
+    border: none;
+    border-radius: 50%;
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    pointer-events: none;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+    z-index: 1;
+  }
+
+  .date-hidden-input:hover ~ .date-toggle,
+  .date-hidden-input:focus ~ .date-toggle {
+    background: var(--hover);
+    color: var(--text);
+  }
+
+  .date-hidden-input:focus-visible ~ .date-toggle {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .date-hidden-input:active ~ .date-toggle { transform: scale(0.92); }
+
+  .date-toggle-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 1.5px solid var(--surface);
+  }
+
+  .date-toggle-dot[hidden] { display: none; }
 
   #add-btn {
     background: var(--accent);
@@ -719,13 +912,14 @@
     flex-shrink: 0;
     font-size: 1.1rem;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, transform 0.1s;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   #add-btn:hover { opacity: 0.88; }
+  #add-btn:active { transform: scale(0.92); }
 
   .legend {
     display: flex;
@@ -742,6 +936,47 @@
 
   /* ---------- Mobile / responsive ---------- */
   .mobile-only { display: none; }
+
+  .quick-filters {
+    display: none;
+    gap: 8px;
+    padding: 0 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .quick-filters::-webkit-scrollbar { display: none; }
+
+  .quick-filter {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .quick-filter.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .board-scroll[data-board-view="today"] #incomplete-section,
+  .board-scroll[data-board-view="today"] #migrated-section,
+  .board-scroll[data-board-view="open"] #today-section,
+  .board-scroll[data-board-view="open"] #migrated-section {
+    display: none;
+  }
+
+  .board-scroll[data-board-view="important"] .entry-item:not(.important) {
+    display: none;
+  }
 
   @media (max-width: 860px) {
     .mobile-only { display: inline-flex; }
@@ -772,9 +1007,17 @@
       display: block;
     }
 
-    .board-scroll { padding: 16px; }
-    .composer-wrap { padding: 8px 12px 16px; }
-    #due-date-input { max-width: 92px; }
+    .main-topbar { min-height: 58px; }
+    .quick-filters { display: flex; }
+    .board-scroll { padding: 4px 16px 16px; }
+    .composer-wrap { padding: 8px 12px calc(16px + env(safe-area-inset-bottom)); }
+
+    .entry-item { padding: 12px 6px; }
+    .entry-item .actions { margin-left: 0; }
+    .entry-item.mobile-actions-open { background: var(--surface-inset); border-radius: 10px; }
+    .drag-handle { min-width: 28px; min-height: 28px; padding-top: 2px; }
+    .icon-btn, .star-btn { min-width: 36px; min-height: 36px; }
+    .due-badge { min-height: 28px; display: inline-flex; align-items: center; }
   }
 </style>
 </head>
@@ -826,6 +1069,13 @@
       </div>
     </header>
 
+    <nav class="quick-filters" aria-label="Quick filters">
+      <button type="button" class="quick-filter active" data-board-view="all" data-i18n="quickAll">All</button>
+      <button type="button" class="quick-filter" data-board-view="today" data-i18n="quickToday">Today</button>
+      <button type="button" class="quick-filter" data-board-view="open" data-i18n="quickOpen">Open</button>
+      <button type="button" class="quick-filter" data-board-view="important" data-i18n="quickImportant">Important</button>
+    </nav>
+
     <div class="board-scroll">
       <section class="board-section" id="today-section">
         <h2><span id="today-entries-label">Today's Entries</span> <span class="section-badge" id="today-label"></span></h2>
@@ -855,13 +1105,29 @@
 
     <div class="composer-wrap">
       <form class="composer" id="entry-form">
-        <div class="type-select" id="type-select">
-          <button type="button" data-type="task" class="active" title="Task">•</button>
-          <button type="button" data-type="event" title="Event">○</button>
-          <button type="button" data-type="note" title="Note">–</button>
+        <div class="type-picker" id="type-picker">
+          <button type="button" class="type-toggle" id="type-toggle" aria-haspopup="true" aria-expanded="false">
+            <span id="type-toggle-symbol">•</span>
+          </button>
+          <div class="type-popover" id="type-popover" role="menu">
+            <button type="button" class="type-option active" data-type="task" role="menuitemradio" aria-checked="true">
+              <span class="opt-symbol">•</span><span class="opt-label" id="opt-label-task">Task</span>
+            </button>
+            <button type="button" class="type-option" data-type="event" role="menuitemradio" aria-checked="false">
+              <span class="opt-symbol">○</span><span class="opt-label" id="opt-label-event">Event</span>
+            </button>
+            <button type="button" class="type-option" data-type="note" role="menuitemradio" aria-checked="false">
+              <span class="opt-symbol">–</span><span class="opt-label" id="opt-label-note">Note</span>
+            </button>
+          </div>
         </div>
         <input type="text" id="entry-input" placeholder="Add a task, event, or note for today..." autocomplete="off">
-        <input type="date" id="due-date-input" title="Due date (optional)">
+        <div class="date-picker" id="date-picker">
+          <input type="date" id="due-date-input" class="date-hidden-input" title="Due date (optional)">
+          <button type="button" class="date-toggle" id="date-toggle" tabindex="-1" aria-hidden="true">
+            📅<span class="date-toggle-dot" id="date-toggle-dot" hidden></span>
+          </button>
+        </div>
         <button type="submit" id="add-btn" title="Add entry">↑</button>
       </form>
       <div class="legend" id="legend"></div>
@@ -875,6 +1141,8 @@
   const LANG_KEY = 'bulletJournalLang';
   const MANUAL_ORDER_KEY = 'bulletJournalManualOrder';
   const BULLET_SYMBOLS = { event: '○', note: '–' };
+  const TYPE_SYMBOLS = { task: '•', event: '○', note: '–' };
+  const TYPE_TITLE_KEY = { task: 'typeTask', event: 'typeEvent', note: 'typeNote' };
   const STATUS_ORDER = ['incomplete', 'completed', 'migrated', 'scheduled'];
   const STATUS_SYMBOLS = { incomplete: '•', completed: '✔', migrated: '>', scheduled: '<' };
 
@@ -888,6 +1156,7 @@
       filterEvent: 'Events',
       filterNote: 'Notes',
       filterImportant: 'Important',
+      quickAll: 'All', quickToday: 'Today', quickOpen: 'Open', quickImportant: 'Important',
       history: 'History',
       darkMode: '🌙 Dark mode',
       lightMode: '☀️ Light mode',
@@ -905,6 +1174,7 @@
       legendDrag: '⋮⋮ drag to reorder', legendDue: '📅 due date',
       legendEdit: 'Double-click text to edit',
       typeTask: 'Task', typeEvent: 'Event', typeNote: 'Note',
+      entryTypeLabel: 'Entry type',
       cycleStatusTitle: 'Click to cycle status: incomplete → completed → migrated → scheduled',
       eventTitle: 'Event', noteTitle: 'Note',
       dueTitle: 'Due ',
@@ -944,6 +1214,7 @@
       filterEvent: 'กิจกรรม',
       filterNote: 'บันทึกย่อ',
       filterImportant: 'สำคัญ',
+      quickAll: 'ทั้งหมด', quickToday: 'วันนี้', quickOpen: 'ค้างอยู่', quickImportant: 'สำคัญ',
       history: 'ประวัติ',
       darkMode: '🌙 โหมดมืด',
       lightMode: '☀️ โหมดสว่าง',
@@ -961,6 +1232,7 @@
       legendDrag: '⋮⋮ ลากเพื่อจัดลำดับ', legendDue: '📅 วันครบกำหนด',
       legendEdit: 'ดับเบิลคลิกข้อความเพื่อแก้ไข',
       typeTask: 'งาน', typeEvent: 'กิจกรรม', typeNote: 'บันทึกย่อ',
+      entryTypeLabel: 'ประเภทรายการ',
       cycleStatusTitle: 'คลิกเพื่อสลับสถานะ: ยังไม่เสร็จ → เสร็จแล้ว → เลื่อน → กำหนดใหม่',
       eventTitle: 'กิจกรรม', noteTitle: 'บันทึกย่อ',
       dueTitle: 'ครบกำหนด ',
@@ -1104,7 +1376,11 @@
   const form = document.getElementById('entry-form');
   const input = document.getElementById('entry-input');
   const dueDateInput = document.getElementById('due-date-input');
-  const typeSelect = document.getElementById('type-select');
+  const dateToggleDot = document.getElementById('date-toggle-dot');
+  const typePicker = document.getElementById('type-picker');
+  const typeToggle = document.getElementById('type-toggle');
+  const typeToggleSymbol = document.getElementById('type-toggle-symbol');
+  const typePopover = document.getElementById('type-popover');
   const todayList = document.getElementById('today-list');
   const incompleteList = document.getElementById('incomplete-list');
   const migratedList = document.getElementById('migrated-list');
@@ -1126,6 +1402,9 @@
   const sidebarToggle = document.getElementById('sidebar-toggle');
   const sidebarClose = document.getElementById('sidebar-close');
   const sidebarOverlay = document.getElementById('sidebar-overlay');
+  const boardScroll = document.querySelector('.board-scroll');
+  const quickFilters = document.querySelector('.quick-filters');
+  let boardView = 'all';
 
   // --- Mobile sidebar toggle ---
   function openSidebar() { document.body.classList.add('sidebar-open'); }
@@ -1134,6 +1413,24 @@
   sidebarClose.addEventListener('click', closeSidebar);
   sidebarOverlay.addEventListener('click', closeSidebar);
   focusInputBtn.addEventListener('click', () => { input.focus(); closeSidebar(); });
+
+  // --- Mobile quick views ---
+  function setBoardView(view) {
+    boardView = view;
+    boardScroll.dataset.boardView = view;
+    quickFilters.querySelectorAll('.quick-filter').forEach(btn => {
+      const active = btn.dataset.boardView === view;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+    const target = view === 'open' ? document.getElementById('incomplete-section') : document.getElementById('today-section');
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  quickFilters.addEventListener('click', (e) => {
+    const button = e.target.closest('.quick-filter');
+    if (button) setBoardView(button.dataset.boardView);
+  });
 
   // --- Theme ---
   function applyTheme(theme) {
@@ -1148,6 +1445,61 @@
     applyTheme(currentTheme);
   });
 
+  // --- Compact date picker (calendar icon w/ hidden native input) ---
+  function refreshDueDateVisual() {
+    const has = !!dueDateInput.value;
+    dateToggleDot.hidden = !has;
+    dueDateInput.title = has ? (t().dueTitle + formatDateLabel(dueDateInput.value)) : t().dueDateOptional;
+  }
+  dueDateInput.addEventListener('change', refreshDueDateVisual);
+  dueDateInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      try { dueDateInput.showPicker(); } catch (err) { /* not supported: native click still works */ }
+    }
+  });
+
+  // --- Collapsible type picker (popover) ---
+  function openTypePopover() {
+    typePicker.classList.add('open');
+    typeToggle.setAttribute('aria-expanded', 'true');
+  }
+  function closeTypePopover() {
+    typePicker.classList.remove('open');
+    typeToggle.setAttribute('aria-expanded', 'false');
+  }
+  function selectType(type) {
+    selectedType = type;
+    typeToggleSymbol.textContent = TYPE_SYMBOLS[type];
+    typeToggle.title = t()[TYPE_TITLE_KEY[type]];
+    typePopover.querySelectorAll('.type-option').forEach(b => {
+      const isActive = b.dataset.type === type;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-checked', String(isActive));
+    });
+  }
+  typeToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (typePicker.classList.contains('open')) closeTypePopover();
+    else openTypePopover();
+  });
+  typePopover.addEventListener('click', (e) => {
+    const btn = e.target.closest('.type-option');
+    if (!btn) return;
+    selectType(btn.dataset.type);
+    closeTypePopover();
+    typeToggle.focus();
+  });
+  document.addEventListener('click', (e) => {
+    if (!typePicker.contains(e.target)) closeTypePopover();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && typePicker.classList.contains('open')) {
+      closeTypePopover();
+      typeToggle.focus();
+    }
+  });
+
   // --- Language ---
   function applyLang() {
     document.documentElement.setAttribute('lang', currentLang === 'th' ? 'th' : 'en');
@@ -1160,6 +1512,7 @@
     document.getElementById('filter-opt-event').textContent = tr.filterEvent;
     document.getElementById('filter-opt-note').textContent = tr.filterNote;
     document.getElementById('filter-opt-important').textContent = tr.filterImportant;
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = tr[el.dataset.i18n]; });
     document.getElementById('history-label').textContent = tr.history;
     themeToggle.textContent = currentTheme === 'dark' ? tr.lightMode : tr.darkMode;
     themeToggle.title = tr.toggleDarkMode;
@@ -1177,11 +1530,16 @@
     document.getElementById('incomplete-badge').textContent = tr.fromPreviousDays;
     document.getElementById('migrated-label').textContent = tr.migratedTasks;
     input.placeholder = tr.entryPlaceholder;
-    dueDateInput.title = tr.dueDateOptional;
     document.getElementById('add-btn').title = tr.addEntryTitle;
-    typeSelect.querySelector('[data-type="task"]').title = tr.typeTask;
-    typeSelect.querySelector('[data-type="event"]').title = tr.typeEvent;
-    typeSelect.querySelector('[data-type="note"]').title = tr.typeNote;
+    typeToggle.setAttribute('aria-label', tr.entryTypeLabel);
+    typeToggle.title = tr[TYPE_TITLE_KEY[selectedType]];
+    document.getElementById('opt-label-task').textContent = tr.typeTask;
+    document.getElementById('opt-label-event').textContent = tr.typeEvent;
+    document.getElementById('opt-label-note').textContent = tr.typeNote;
+    typePopover.querySelectorAll('.type-option').forEach(b => {
+      b.title = tr[TYPE_TITLE_KEY[b.dataset.type]];
+    });
+    refreshDueDateVisual();
     document.getElementById('legend').innerHTML =
       '<span>' + tr.legendTask + '</span>' +
       '<span>' + tr.legendEvent + '</span>' +
@@ -1247,6 +1605,7 @@
   filterSelect.addEventListener('change', () => {
     filterType = filterSelect.value;
     render();
+    if (window.matchMedia('(max-width: 860px)').matches) closeSidebar();
   });
 
   function matchesFilter(entry) {
@@ -1255,14 +1614,6 @@
     if (searchQuery && !entry.text.toLowerCase().includes(searchQuery)) return false;
     return true;
   }
-
-  // --- Type selector ---
-  typeSelect.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    selectedType = btn.dataset.type;
-    typeSelect.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
-  });
 
   // --- Add entry ---
   form.addEventListener('submit', (e) => {
@@ -1284,6 +1635,7 @@
     saveEntries(entries);
     input.value = '';
     dueDateInput.value = '';
+    refreshDueDateVisual();
     render();
     input.focus();
   });
@@ -1658,6 +2010,92 @@
     });
   }
 
+  // --- Touch-friendly row actions and long-press reordering ---
+  // Native HTML5 DnD remains active for mouse/trackpad. On touch screens a tap
+  // reveals row controls; holding a top-level row for 450ms starts reordering.
+  function setupMobileRowActions(container, sectionKey) {
+    let timer = null;
+    let dragItem = null;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let suppressClickUntil = 0;
+
+    const isMobile = () => window.matchMedia('(max-width: 860px)').matches;
+    const clearState = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = null;
+      clearDragOverMarks(container);
+      if (dragItem) dragItem.classList.remove('mobile-reordering', 'dragging');
+      dragItem = null;
+      pointerId = null;
+    };
+
+    container.addEventListener('click', (e) => {
+      if (!isMobile() || Date.now() < suppressClickUntil) return;
+      const li = e.target.closest('.entry-item');
+      if (!li || !container.contains(li) || e.target.closest('button, input, select, a')) return;
+      document.querySelectorAll('.entry-item.mobile-actions-open').forEach(row => {
+        if (row !== li) row.classList.remove('mobile-actions-open');
+      });
+      li.classList.toggle('mobile-actions-open');
+    });
+
+    container.addEventListener('pointerdown', (e) => {
+      if (!isMobile() || e.pointerType !== 'touch' || e.target.closest('button, input, select, a')) return;
+      const li = e.target.closest('.entry-item[draggable="true"]');
+      if (!li || !container.contains(li)) return;
+      document.body.classList.add('is-touch');
+      startX = e.clientX;
+      startY = e.clientY;
+      pointerId = e.pointerId;
+      timer = window.setTimeout(() => {
+        dragItem = li;
+        suppressClickUntil = Date.now() + 450;
+        document.querySelectorAll('.entry-item.mobile-actions-open').forEach(row => row.classList.remove('mobile-actions-open'));
+        li.classList.add('mobile-reordering', 'dragging');
+        try { li.setPointerCapture(pointerId); } catch (err) {}
+        if (navigator.vibrate) navigator.vibrate(15);
+      }, 450);
+    }, { passive: true });
+
+    container.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== pointerId) return;
+      if (!dragItem && timer && Math.hypot(e.clientX - startX, e.clientY - startY) > 10) {
+        window.clearTimeout(timer);
+        timer = null;
+        return;
+      }
+      if (!dragItem) return;
+      e.preventDefault();
+      const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.entry-item:not(.sub-entry)');
+      clearDragOverMarks(container);
+      if (!target || !container.contains(target) || target === dragItem) return;
+      const rect = target.getBoundingClientRect();
+      target.classList.add(e.clientY - rect.top < rect.height / 2 ? 'drag-over-top' : 'drag-over-bottom');
+    }, { passive: false });
+
+    const finishTouchDrag = (e) => {
+      if (e.pointerId !== pointerId) return;
+      if (!dragItem) { clearState(); return; }
+      e.preventDefault();
+      const draggedId = dragItem.dataset.id;
+      const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.entry-item:not(.sub-entry)');
+      if (target && container.contains(target) && target !== dragItem) {
+        const rect = target.getBoundingClientRect();
+        const before = e.clientY - rect.top < rect.height / 2;
+        clearState();
+        reorderSection(sectionKey, draggedId, target.dataset.id, before);
+      } else {
+        clearState();
+      }
+      suppressClickUntil = Date.now() + 450;
+    };
+
+    container.addEventListener('pointerup', finishTouchDrag, { passive: false });
+    container.addEventListener('pointercancel', clearState, { passive: true });
+  }
+
   function render() {
     // ----- Today's Entries -----
     todayList.innerHTML = '';
@@ -1791,6 +2229,9 @@
   setupDragSort(todayList, 'today');
   setupDragSort(incompleteList, 'incomplete');
   setupDragSort(migratedList, 'migrated');
+  setupMobileRowActions(todayList, 'today');
+  setupMobileRowActions(incompleteList, 'incomplete');
+  setupMobileRowActions(migratedList, 'migrated');
 
   render();
 </script>
