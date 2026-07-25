@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
   (function () {
     try {
@@ -15,11 +18,12 @@
 <title>Bullet Journal</title>
 <style>
   :root {
-    --bg: #ffffff;
-    --sidebar-bg: #f5f4f0;
-    --surface: #ffffff;
-    --surface-inset: #f7f6f3;
-    --border: #e6e3dd;
+    color-scheme: light;
+    --bg: #FAFAFA;
+    --sidebar-bg: #F5F4F1;
+    --surface: #FFFFFF;
+    --surface-inset: #F2F1EE;
+    --border: #E8E6E1;
     --text: #2b2924;
     --text-muted: #8a8578;
     --accent: #3d5a4c;
@@ -30,18 +34,23 @@
     --important: #b8860b;
     --important-bg: #fdf6e0;
     --danger: #b3413e;
+    --overdue: #c0392b;
+    --overdue-bg: #fdecea;
+    --due-today: #b5651d;
+    --due-today-bg: #fdf1e0;
     --hover: rgba(0,0,0,0.05);
     --radius: 14px;
-    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-    --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+    --shadow: 0 1px 2px rgba(0,0,0,0.03), 0 3px 10px rgba(0,0,0,0.03);
+    --shadow-lg: 0 8px 28px rgba(0,0,0,0.08);
   }
 
   :root[data-theme="dark"] {
-    --bg: #212121;
-    --sidebar-bg: #171717;
-    --surface: #2a2a28;
-    --surface-inset: #262625;
-    --border: #3a3937;
+    color-scheme: dark;
+    --bg: #171717;
+    --sidebar-bg: #131313;
+    --surface: #1f1f1f;
+    --surface-inset: #1b1b1b;
+    --border: #2c2c2c;
     --text: #ece7dc;
     --text-muted: #9b968a;
     --accent: #6fae8f;
@@ -52,6 +61,10 @@
     --important: #e8c468;
     --important-bg: #332c17;
     --danger: #d9776f;
+    --overdue: #e57373;
+    --overdue-bg: #3a1f1f;
+    --due-today: #e0a458;
+    --due-today-bg: #3a2c14;
     --hover: rgba(255,255,255,0.06);
     --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 4px 14px rgba(0,0,0,0.3);
     --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
@@ -62,7 +75,8 @@
   html, body {
     margin: 0;
     height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-family: 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
     background: var(--bg);
     color: var(--text);
   }
@@ -366,6 +380,40 @@
     padding: 8px 16px;
   }
 
+  /* ---------- Daily progress bar ---------- */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: -2px 0 10px;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--surface-inset);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
+  .progress-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .progress-wrap.empty .progress-track { opacity: 0.5; }
+
   .entry-list {
     list-style: none;
     margin: 0;
@@ -377,9 +425,11 @@
   .entry-item {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 8px 8px;
     padding: 10px 4px;
     border-bottom: 1px solid var(--border);
+    transition: box-shadow 0.1s, opacity 0.15s;
   }
 
   .entry-item:last-child { border-bottom: none; }
@@ -407,6 +457,26 @@
     color: var(--important);
   }
 
+  .entry-item.dragging { opacity: 0.4; }
+  .entry-item.drag-over-top { box-shadow: inset 0 2px 0 0 var(--accent); }
+  .entry-item.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--accent); }
+
+  .drag-handle {
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    cursor: grab;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .entry-item:hover .drag-handle { opacity: 1; }
+  .entry-item.dragging .drag-handle { cursor: grabbing; }
+
   .bullet-mark {
     flex-shrink: 0;
     width: 20px;
@@ -428,7 +498,8 @@
   .bullet-mark.note { color: var(--note-color); }
 
   .entry-text {
-    flex: 1;
+    flex: 1 1 140px;
+    min-width: 140px;
     font-size: 0.95rem;
     line-height: 1.5;
     word-break: break-word;
@@ -459,7 +530,42 @@
     margin-top: 2px;
   }
 
-  .edit-input {
+  .due-badge {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 500;
+    border-radius: 999px;
+    padding: 1px 9px;
+    margin-top: 1px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .due-badge.due-overdue {
+    color: var(--overdue);
+    background: var(--overdue-bg);
+    font-weight: 700;
+  }
+
+  .due-badge.due-today {
+    color: var(--due-today);
+    background: var(--due-today-bg);
+    font-weight: 700;
+  }
+
+  .due-badge.due-future {
+    color: var(--text-muted);
+    background: var(--surface-inset);
+  }
+
+  .due-add-btn {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .entry-item:hover .due-add-btn { opacity: 1; }
+
+  .edit-input, .edit-date-input {
     flex: 1;
     border: 1px solid var(--accent);
     border-radius: 6px;
@@ -470,7 +576,9 @@
     color: var(--text);
   }
 
-  .edit-input:focus { outline: none; }
+  .edit-date-input { flex: none; font-size: 0.8rem; }
+
+  .edit-input:focus, .edit-date-input:focus { outline: none; }
 
   .star-btn {
     flex-shrink: 0;
@@ -479,7 +587,7 @@
     cursor: pointer;
     font-size: 0.95rem;
     color: var(--text-muted);
-    opacity: 0.45;
+    opacity: 0;
     padding: 0 2px;
     transition: opacity 0.15s;
   }
@@ -587,6 +695,20 @@
     outline: none;
   }
 
+  #due-date-input {
+    border: none;
+    background: var(--surface-inset);
+    border-radius: 20px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: inherit;
+    flex-shrink: 0;
+    max-width: 122px;
+  }
+
+  #due-date-input:focus { outline: none; color: var(--text); }
+
   #add-btn {
     background: var(--accent);
     color: #fff;
@@ -652,6 +774,7 @@
 
     .board-scroll { padding: 16px; }
     .composer-wrap { padding: 8px 12px 16px; }
+    #due-date-input { max-width: 92px; }
   }
 </style>
 </head>
@@ -705,6 +828,10 @@
     <div class="board-scroll">
       <section class="board-section" id="today-section">
         <h2>Today's Entries <span class="section-badge" id="today-label"></span></h2>
+        <div class="progress-wrap" id="today-progress-wrap">
+          <div class="progress-track"><div class="progress-fill" id="today-progress-fill"></div></div>
+          <span class="progress-text" id="today-progress-text"></span>
+        </div>
         <div class="board-card">
           <ul class="entry-list" id="today-list"></ul>
         </div>
@@ -733,6 +860,7 @@
           <button type="button" data-type="note" title="Note">–</button>
         </div>
         <input type="text" id="entry-input" placeholder="Add a task, event, or note for today..." autocomplete="off">
+        <input type="date" id="due-date-input" title="Due date (optional)">
         <button type="submit" id="add-btn" title="Add entry">↑</button>
       </form>
       <div class="legend">
@@ -741,6 +869,8 @@
         <span>– note</span>
         <span>☆ important</span>
         <span>⊘ cancel</span>
+        <span>⋮⋮ drag to reorder</span>
+        <span>📅 due date</span>
         <span>Double-click text to edit</span>
       </div>
     </div>
@@ -750,6 +880,7 @@
 <script>
   const STORAGE_KEY = 'bulletJournalEntries';
   const THEME_KEY = 'bulletJournalTheme';
+  const MANUAL_ORDER_KEY = 'bulletJournalManualOrder';
   const BULLET_SYMBOLS = { event: '○', note: '–' };
   const STATUS_ORDER = ['incomplete', 'completed', 'migrated', 'scheduled'];
   const STATUS_SYMBOLS = { incomplete: '•', completed: '✔', migrated: '>', scheduled: '<' };
@@ -775,16 +906,54 @@
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
 
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+  }
+
+  function dueDateStatus(dueDate) {
+    if (!dueDate) return null;
+    if (dueDate < TODAY) return 'overdue';
+    if (dueDate === TODAY) return 'today';
+    return 'future';
+  }
+
+  function renderDueBadgeHtml(dueDate) {
+    if (!dueDate) return '';
+    const status = dueDateStatus(dueDate);
+    const icon = status === 'overdue' ? '⚠' : '📅';
+    return '<span class="due-badge due-' + status + '" title="Due ' + escapeHtml(formatDateLabel(dueDate)) + '">'
+      + icon + ' ' + escapeHtml(formatDateShort(dueDate)) + '</span>';
+  }
+
+  function dueBucketRank(dueDate) {
+    if (!dueDate) return 3;
+    const status = dueDateStatus(dueDate);
+    return status === 'overdue' ? 0 : (status === 'today' ? 1 : 2);
+  }
+
+  function defaultCompare(a, b) {
+    const ai = a.important ? 0 : 1, bi = b.important ? 0 : 1;
+    if (ai !== bi) return ai - bi;
+    const ar = dueBucketRank(a.dueDate), br = dueBucketRank(b.dueDate);
+    if (ar !== br) return ar - br;
+    if (a.dueDate && b.dueDate && a.dueDate !== b.dueDate) return a.dueDate < b.dueDate ? -1 : 1;
+    return (a.orderIndex || 0) - (b.orderIndex || 0);
+  }
+
   function normalizeEntry(e) {
     return {
       id: e.id || genId(),
       text: e.text || '',
       type: (e.type === 'task' || e.type === 'event' || e.type === 'note') ? e.type : 'note',
       date: e.date || todayKey(),
+      dueDate: e.dueDate || null,
       status: STATUS_ORDER.includes(e.status) ? e.status : (e.completed ? 'completed' : 'incomplete'),
       cancelled: !!e.cancelled,
       important: !!e.important,
-      parentId: e.parentId || null
+      parentId: e.parentId || null,
+      orderIndex: typeof e.orderIndex === 'number' ? e.orderIndex : Date.now()
     };
   }
 
@@ -801,15 +970,30 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
   }
 
+  function loadManualOrder() {
+    try {
+      return Object.assign({ today: false, incomplete: false, migrated: false }, JSON.parse(localStorage.getItem(MANUAL_ORDER_KEY)) || {});
+    } catch (e) {
+      return { today: false, incomplete: false, migrated: false };
+    }
+  }
+
+  function saveManualOrder() {
+    localStorage.setItem(MANUAL_ORDER_KEY, JSON.stringify(manualOrder));
+  }
+
   let entries = loadEntries();
+  let manualOrder = loadManualOrder();
   let selectedType = 'task';
   let addingSubnoteFor = null;
   let searchQuery = '';
   let filterType = 'all';
   const TODAY = todayKey();
+  const sectionTopOrder = { today: [], incomplete: [], migrated: [] };
 
   const form = document.getElementById('entry-form');
   const input = document.getElementById('entry-input');
+  const dueDateInput = document.getElementById('due-date-input');
   const typeSelect = document.getElementById('type-select');
   const todayList = document.getElementById('today-list');
   const incompleteList = document.getElementById('incomplete-list');
@@ -817,6 +1001,9 @@
   const historyContainer = document.getElementById('history-container');
   const todayDisplay = document.getElementById('today-display');
   const todayLabel = document.getElementById('today-label');
+  const todayProgressWrap = document.getElementById('today-progress-wrap');
+  const todayProgressFill = document.getElementById('today-progress-fill');
+  const todayProgressText = document.getElementById('today-progress-text');
   const themeToggle = document.getElementById('theme-toggle');
   const exportBtn = document.getElementById('export-btn');
   const importBtn = document.getElementById('import-btn');
@@ -925,13 +1112,16 @@
       text,
       type: selectedType,
       date: TODAY,
+      dueDate: dueDateInput.value || null,
       status: 'incomplete',
       cancelled: false,
       important: false,
-      parentId: null
+      parentId: null,
+      orderIndex: Date.now()
     });
     saveEntries(entries);
     input.value = '';
+    dueDateInput.value = '';
     render();
     input.focus();
   });
@@ -1012,6 +1202,65 @@
     });
   }
 
+  function startAddDueDate(entry, btnEl) {
+    const inputEl = document.createElement('input');
+    inputEl.type = 'date';
+    inputEl.className = 'edit-date-input';
+    btnEl.replaceWith(inputEl);
+    inputEl.focus();
+
+    let settled = false;
+    const commit = () => {
+      if (settled) return;
+      settled = true;
+      if (inputEl.value) entry.dueDate = inputEl.value;
+      saveEntries(entries);
+      render();
+    };
+    const cancelEdit = () => {
+      if (settled) return;
+      settled = true;
+      render();
+    };
+
+    inputEl.addEventListener('blur', commit);
+    inputEl.addEventListener('change', commit);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); inputEl.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    });
+  }
+
+  function startEditDueDate(entry, badgeEl) {
+    const inputEl = document.createElement('input');
+    inputEl.type = 'date';
+    inputEl.className = 'edit-date-input';
+    inputEl.value = entry.dueDate || '';
+    badgeEl.replaceWith(inputEl);
+    inputEl.focus();
+
+    let settled = false;
+    const commit = () => {
+      if (settled) return;
+      settled = true;
+      entry.dueDate = inputEl.value || null;
+      saveEntries(entries);
+      render();
+    };
+    const cancelEdit = () => {
+      if (settled) return;
+      settled = true;
+      render();
+    };
+
+    inputEl.addEventListener('blur', commit);
+    inputEl.addEventListener('change', commit);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); inputEl.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    });
+  }
+
   function createSubnoteInputRow(parentEntry) {
     const li = document.createElement('li');
     li.className = 'entry-item subnote-input-row';
@@ -1032,10 +1281,12 @@
           text: val,
           type: 'note',
           date: parentEntry.date,
+          dueDate: null,
           status: 'incomplete',
           cancelled: false,
           important: false,
-          parentId: parentEntry.id
+          parentId: parentEntry.id,
+          orderIndex: Date.now()
         });
         saveEntries(entries);
       }
@@ -1061,90 +1312,79 @@
 
   function createEntryItem(entry, opts) {
     opts = opts || {};
+    const isTopLevel = !entry.parentId;
+    const draggable = !!(opts.draggable && isTopLevel);
+
     const li = document.createElement('li');
     li.className = 'entry-item';
+    li.dataset.id = entry.id;
     if (entry.status === 'completed') li.classList.add('completed');
     if (entry.cancelled) li.classList.add('cancelled');
     if (entry.important) li.classList.add('important');
     if (entry.parentId) li.classList.add('sub-entry');
     li.dataset.status = entry.status;
+    if (draggable) li.draggable = true;
 
-    const bullet = document.createElement('span');
-    bullet.className = 'bullet-mark ' + entry.type;
+    const bulletSymbol = entry.type === 'task' ? STATUS_SYMBOLS[entry.status] : BULLET_SYMBOLS[entry.type];
+    const bulletTitle = entry.type === 'task'
+      ? 'Click to cycle status: incomplete → completed → migrated → scheduled'
+      : (entry.type === 'event' ? 'Event' : 'Note');
+
+    const dragHandleHtml = draggable ? '<span class="drag-handle" title="Drag to reorder">⋮⋮</span>' : '';
+    const dueBadgeHtml = renderDueBadgeHtml(entry.dueDate);
+    const dueAddBtnHtml = !entry.dueDate ? '<button type="button" class="icon-btn due-add-btn" title="Set due date">📅</button>' : '';
+    const dateChipHtml = opts.showDateChip ? '<span class="date-chip">' + escapeHtml(formatDateShort(entry.date)) + '</span>' : '';
+
+    li.innerHTML =
+      dragHandleHtml +
+      '<span class="bullet-mark ' + entry.type + (entry.type === 'task' ? ' clickable' : '') + '" title="' + escapeHtml(bulletTitle) + '">' + bulletSymbol + '</span>' +
+      '<span class="entry-text" title="Double-click to edit">' + escapeHtml(entry.text) + '</span>' +
+      dueBadgeHtml +
+      dateChipHtml +
+      '<button type="button" class="star-btn' + (entry.important ? ' active' : '') + '" title="' + (entry.important ? 'Unmark important' : 'Mark important') + '">' + (entry.important ? '★' : '☆') + '</button>' +
+      '<span class="actions">' +
+        dueAddBtnHtml +
+        '<button type="button" class="icon-btn cancel-btn' + (entry.cancelled ? ' active' : '') + '" title="' + (entry.cancelled ? 'Uncancel entry' : 'Cancel entry') + '">⊘</button>' +
+        (isTopLevel ? '<button type="button" class="icon-btn sub-btn" title="Add sub-note">+</button>' : '') +
+        '<button type="button" class="icon-btn delete-btn" title="Delete">✕</button>' +
+      '</span>';
+
     if (entry.type === 'task') {
-      bullet.textContent = STATUS_SYMBOLS[entry.status];
-      bullet.classList.add('clickable');
-      bullet.title = 'Click to cycle status: incomplete → completed → migrated → scheduled';
-      bullet.addEventListener('click', () => cycleStatus(entry.id));
-    } else {
-      bullet.textContent = BULLET_SYMBOLS[entry.type];
-      bullet.title = entry.type === 'event' ? 'Event' : 'Note';
+      li.querySelector('.bullet-mark').addEventListener('click', () => cycleStatus(entry.id));
     }
+    li.querySelector('.entry-text').addEventListener('dblclick', () => startEdit(li, entry));
 
-    const text = document.createElement('span');
-    text.className = 'entry-text';
-    text.textContent = entry.text;
-    text.title = 'Double-click to edit';
-    text.addEventListener('dblclick', () => startEdit(li, entry));
+    const dueBadgeEl = li.querySelector('.due-badge');
+    if (dueBadgeEl) dueBadgeEl.addEventListener('dblclick', () => startEditDueDate(entry, dueBadgeEl));
 
-    const starBtn = document.createElement('button');
-    starBtn.type = 'button';
-    starBtn.className = 'star-btn' + (entry.important ? ' active' : '');
-    starBtn.textContent = entry.important ? '★' : '☆';
-    starBtn.title = entry.important ? 'Unmark important' : 'Mark important';
-    starBtn.addEventListener('click', () => toggleImportant(entry.id));
+    const dueAddBtn = li.querySelector('.due-add-btn');
+    if (dueAddBtn) dueAddBtn.addEventListener('click', () => startAddDueDate(entry, dueAddBtn));
 
-    li.appendChild(bullet);
-    li.appendChild(text);
+    li.querySelector('.star-btn').addEventListener('click', () => toggleImportant(entry.id));
+    li.querySelector('.cancel-btn').addEventListener('click', () => toggleCancelled(entry.id));
 
-    if (opts.showDateChip) {
-      const chip = document.createElement('span');
-      chip.className = 'date-chip';
-      chip.textContent = formatDateShort(entry.date);
-      li.appendChild(chip);
-    }
-
-    li.appendChild(starBtn);
-
-    const actions = document.createElement('span');
-    actions.className = 'actions';
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.className = 'icon-btn cancel-btn' + (entry.cancelled ? ' active' : '');
-    cancelBtn.textContent = '⊘';
-    cancelBtn.title = entry.cancelled ? 'Uncancel entry' : 'Cancel entry';
-    cancelBtn.addEventListener('click', () => toggleCancelled(entry.id));
-    actions.appendChild(cancelBtn);
-
-    if (!entry.parentId) {
-      const subBtn = document.createElement('button');
-      subBtn.type = 'button';
-      subBtn.className = 'icon-btn sub-btn';
-      subBtn.textContent = '+';
-      subBtn.title = 'Add sub-note';
+    const subBtn = li.querySelector('.sub-btn');
+    if (subBtn) {
       subBtn.addEventListener('click', () => {
         addingSubnoteFor = addingSubnoteFor === entry.id ? null : entry.id;
         render();
       });
-      actions.appendChild(subBtn);
     }
 
-    const del = document.createElement('button');
-    del.type = 'button';
-    del.className = 'icon-btn delete-btn';
-    del.textContent = '✕';
-    del.title = 'Delete';
-    del.addEventListener('click', () => deleteEntry(entry.id));
-    actions.appendChild(del);
+    li.querySelector('.delete-btn').addEventListener('click', () => deleteEntry(entry.id));
 
-    li.appendChild(actions);
     return li;
   }
 
-  // Renders a flat board section: top-level entries matching filterTopFn, plus their sub-notes.
-  function buildFlatSection(filterTopFn, opts) {
-    const top = entries.filter(en => !en.parentId && filterTopFn(en));
+  // Renders a flat board section: top-level entries matching filterTopFn (sorted by default or manual
+  // order for this section), plus their sub-notes. Records the top-level order for drag-and-drop reordering.
+  function buildFlatSection(sectionKey, filterTopFn, opts) {
+    let top = entries.filter(en => !en.parentId && filterTopFn(en));
+    top = manualOrder[sectionKey]
+      ? top.slice().sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))
+      : top.slice().sort(defaultCompare);
+    sectionTopOrder[sectionKey] = top.map(e => e.id);
+
     const elements = [];
     top.forEach(t => {
       elements.push(createEntryItem(t, opts));
@@ -1185,6 +1425,78 @@
     container.appendChild(empty);
   }
 
+  // --- Drag and drop (native HTML5 DnD) ---
+  function clearDragOverMarks(container) {
+    container.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(el => {
+      el.classList.remove('drag-over-top', 'drag-over-bottom');
+    });
+  }
+
+  function reorderSection(sectionKey, draggedId, targetId, placeBefore) {
+    const ids = (sectionTopOrder[sectionKey] || []).slice();
+    const from = ids.indexOf(draggedId);
+    if (from === -1) return;
+    ids.splice(from, 1);
+    let to = ids.indexOf(targetId);
+    if (to === -1) return;
+    if (!placeBefore) to += 1;
+    ids.splice(to, 0, draggedId);
+    ids.forEach((id, i) => {
+      const en = entries.find(x => x.id === id);
+      if (en) en.orderIndex = i;
+    });
+    manualOrder[sectionKey] = true;
+    saveManualOrder();
+    saveEntries(entries);
+    render();
+  }
+
+  function setupDragSort(container, sectionKey) {
+    let draggedId = null;
+
+    container.addEventListener('dragstart', (e) => {
+      const li = e.target.closest('.entry-item[draggable="true"]');
+      if (!li) return;
+      draggedId = li.dataset.id;
+      li.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', draggedId);
+    });
+
+    container.addEventListener('dragover', (e) => {
+      if (!draggedId) return;
+      e.preventDefault();
+      const target = e.target.closest('.entry-item:not(.sub-entry)');
+      clearDragOverMarks(container);
+      if (!target || target.dataset.id === draggedId) return;
+      const rect = target.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      target.classList.add(before ? 'drag-over-top' : 'drag-over-bottom');
+    });
+
+    container.addEventListener('dragleave', (e) => {
+      if (!container.contains(e.relatedTarget)) clearDragOverMarks(container);
+    });
+
+    container.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const target = e.target.closest('.entry-item:not(.sub-entry)');
+      clearDragOverMarks(container);
+      if (!draggedId || !target || target.dataset.id === draggedId) { draggedId = null; return; }
+      const rect = target.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      reorderSection(sectionKey, draggedId, target.dataset.id, before);
+      draggedId = null;
+    });
+
+    container.addEventListener('dragend', () => {
+      clearDragOverMarks(container);
+      const dragging = container.querySelector('.dragging');
+      if (dragging) dragging.classList.remove('dragging');
+      draggedId = null;
+    });
+  }
+
   function render() {
     // ----- Today's Entries -----
     todayList.innerHTML = '';
@@ -1192,14 +1504,26 @@
     if (todayTopCount === 0) {
       renderEmpty(todayList, 'No entries yet today. Add one below.');
     } else {
-      buildFlatSection(en => en.date === TODAY).forEach(li => todayList.appendChild(li));
+      buildFlatSection('today', en => en.date === TODAY, { draggable: true }).forEach(li => todayList.appendChild(li));
     }
+
+    // ----- Daily progress bar -----
+    const todayTasks = entries.filter(en => en.date === TODAY && en.type === 'task' && !en.parentId && !en.cancelled);
+    const completedCount = todayTasks.filter(en => en.status === 'completed').length;
+    const totalCount = todayTasks.length;
+    const pct = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
+    todayProgressFill.style.width = pct + '%';
+    todayProgressText.textContent = totalCount
+      ? completedCount + ' / ' + totalCount + ' tasks completed (' + pct + '%)'
+      : 'No tasks yet today';
+    todayProgressWrap.classList.toggle('empty', totalCount === 0);
 
     // ----- Incomplete Tasks (previous days, still open) -----
     incompleteList.innerHTML = '';
     const incompleteEls = buildFlatSection(
+      'incomplete',
       en => en.type === 'task' && en.date !== TODAY && en.status === 'incomplete' && !en.cancelled,
-      { showDateChip: true }
+      { showDateChip: true, draggable: true }
     );
     if (incompleteEls.length === 0) {
       renderEmpty(incompleteList, "You're all caught up — no incomplete tasks from previous days.");
@@ -1210,8 +1534,9 @@
     // ----- Upcoming / Migrated Tasks -----
     migratedList.innerHTML = '';
     const migratedEls = buildFlatSection(
+      'migrated',
       en => en.type === 'task' && en.date !== TODAY && (en.status === 'migrated' || en.status === 'scheduled') && !en.cancelled,
-      { showDateChip: true }
+      { showDateChip: true, draggable: true }
     );
     if (migratedEls.length === 0) {
       renderEmpty(migratedList, 'No migrated or scheduled tasks.');
@@ -1250,7 +1575,7 @@
       const row = document.createElement('div');
       row.className = 'day-row';
       const labelSpan = document.createElement('span');
-      labelSpan.innerHTML = '<span class="arrow">›</span>' + formatDateShort(dateKey);
+      labelSpan.innerHTML = '<span class="arrow">›</span>' + escapeHtml(formatDateShort(dateKey));
       labelSpan.title = formatDateLabel(dateKey);
       const countSpan = document.createElement('span');
       countSpan.className = 'count';
@@ -1301,6 +1626,10 @@
       historyContainer.appendChild(empty);
     }
   }
+
+  setupDragSort(todayList, 'today');
+  setupDragSort(incompleteList, 'incomplete');
+  setupDragSort(migratedList, 'migrated');
 
   render();
 </script>
