@@ -609,6 +609,17 @@
     margin-top: 2px;
   }
 
+  .entry-item .created-chip {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 3px;
+    opacity: 0.75;
+    white-space: nowrap;
+  }
+
   .due-badge {
     flex-shrink: 0;
     font-size: 0.72rem;
@@ -651,7 +662,7 @@
     pointer-events: auto;
   }
 
-  .edit-input, .edit-date-input {
+  .edit-input, .edit-date-input, .edit-time-input {
     flex: 1;
     border: 1px solid var(--accent);
     border-radius: 6px;
@@ -663,8 +674,16 @@
   }
 
   .edit-date-input { flex: none; font-size: 0.8rem; }
+  .edit-time-input { flex: none; font-size: 0.8rem; width: 88px; }
 
-  .edit-input:focus, .edit-date-input:focus { outline: none; }
+  .due-editor {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .edit-input:focus, .edit-date-input:focus, .edit-time-input:focus { outline: none; }
 
   .star-btn {
     flex-shrink: 0;
@@ -1095,6 +1114,8 @@
     .entry-item.important .star-btn,
     .entry-item.mobile-actions-open .star-btn { display: inline-flex; align-items: center; justify-content: center; }
     .due-badge { min-height: 28px; display: inline-flex; align-items: center; }
+    .created-chip { display: none; }
+    .entry-item.mobile-actions-open .created-chip { display: inline-flex; margin-left: auto; }
     .legend { margin-top: 6px; gap: 9px; font-size: 0.67rem; }
     .legend span:nth-child(n + 4) { display: none; }
   }
@@ -1207,6 +1228,12 @@
             📅<span class="date-toggle-dot" id="date-toggle-dot" hidden></span>
           </button>
         </div>
+        <div class="date-picker time-picker" id="time-picker">
+          <input type="time" id="due-time-input" class="date-hidden-input" title="Due time (optional)">
+          <button type="button" class="date-toggle" id="time-toggle" tabindex="-1" aria-hidden="true">
+            🕐<span class="date-toggle-dot" id="time-toggle-dot" hidden></span>
+          </button>
+        </div>
         <button type="submit" id="add-btn" title="Add entry">↑</button>
       </form>
       <div class="legend" id="legend"></div>
@@ -1263,6 +1290,9 @@
       addSubnote: 'Add sub-note', deleteTitle: 'Delete',
       editTitle: 'Double-click to edit',
       subnotePlaceholder: 'Sub-note...',
+      createdAtTitle: 'Logged at ',
+      dueTimeOptional: 'Due time (optional)',
+      dueTimeSetTitle: 'Due time ',
       noEntriesToday: 'No entries yet today. Add one below.',
       noTasksToday: 'No tasks yet today',
       tasksCompleted: (c, t, p) => c + ' / ' + t + ' tasks completed (' + p + '%)',
@@ -1321,6 +1351,9 @@
       addSubnote: 'เพิ่มบันทึกย่อย', deleteTitle: 'ลบ',
       editTitle: 'ดับเบิลคลิกเพื่อแก้ไข',
       subnotePlaceholder: 'บันทึกย่อย...',
+      createdAtTitle: 'บันทึกเมื่อ ',
+      dueTimeOptional: 'เวลาครบกำหนด (ไม่บังคับ)',
+      dueTimeSetTitle: 'เวลาครบกำหนด ',
       noEntriesToday: 'ยังไม่มีรายการวันนี้ เพิ่มรายการด้านล่าง',
       noTasksToday: 'ยังไม่มีงานวันนี้',
       tasksCompleted: (c, t, p) => c + ' / ' + t + ' งานเสร็จแล้ว (' + p + '%)',
@@ -1353,6 +1386,22 @@
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
 
+  function formatTimeShort(timeKey) {
+    const [h, m] = timeKey.split(':').map(Number);
+    const d = new Date(2000, 0, 1, h, m);
+    return d.toLocaleTimeString(t().locale, { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function formatCreatedAt(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString(t().locale, { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function formatCreatedAtFull(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString(t().locale, { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
   function formatDateLabel(dateKey) {
     const [y, m, d] = dateKey.split('-').map(Number);
     const date = new Date(y, m - 1, d);
@@ -1378,12 +1427,14 @@
     return 'future';
   }
 
-  function renderDueBadgeHtml(dueDate) {
+  function renderDueBadgeHtml(dueDate, dueTime) {
     if (!dueDate) return '';
     const status = dueDateStatus(dueDate);
     const icon = status === 'overdue' ? '⚠' : '📅';
-    return '<span class="due-badge due-' + status + '" title="' + escapeHtml(t().dueTitle) + escapeHtml(formatDateLabel(dueDate)) + '">'
-      + icon + ' ' + escapeHtml(formatDateShort(dueDate)) + '</span>';
+    const label = formatDateShort(dueDate) + (dueTime ? ' ' + formatTimeShort(dueTime) : '');
+    const titleLabel = formatDateLabel(dueDate) + (dueTime ? ' ' + formatTimeShort(dueTime) : '');
+    return '<span class="due-badge due-' + status + '" title="' + escapeHtml(t().dueTitle) + escapeHtml(titleLabel) + '">'
+      + icon + ' ' + escapeHtml(label) + '</span>';
   }
 
   function dueBucketRank(dueDate) {
@@ -1398,21 +1449,25 @@
     const ar = dueBucketRank(a.dueDate), br = dueBucketRank(b.dueDate);
     if (ar !== br) return ar - br;
     if (a.dueDate && b.dueDate && a.dueDate !== b.dueDate) return a.dueDate < b.dueDate ? -1 : 1;
+    if (a.dueDate && b.dueDate && (a.dueTime || '') !== (b.dueTime || '')) return (a.dueTime || '') < (b.dueTime || '') ? -1 : 1;
     return (a.orderIndex || 0) - (b.orderIndex || 0);
   }
 
   function normalizeEntry(e) {
+    const idTimestamp = e.id ? parseInt(String(e.id).split('-')[0], 10) : NaN;
     return {
       id: e.id || genId(),
       text: e.text || '',
       type: (e.type === 'task' || e.type === 'event' || e.type === 'note') ? e.type : 'note',
       date: e.date || todayKey(),
       dueDate: e.dueDate || null,
+      dueTime: e.dueTime || null,
       status: STATUS_ORDER.includes(e.status) ? e.status : (e.completed ? 'completed' : 'incomplete'),
       cancelled: !!e.cancelled,
       important: !!e.important,
       parentId: e.parentId || null,
-      orderIndex: typeof e.orderIndex === 'number' ? e.orderIndex : Date.now()
+      orderIndex: typeof e.orderIndex === 'number' ? e.orderIndex : Date.now(),
+      createdAt: e.createdAt || (Number.isFinite(idTimestamp) ? new Date(idTimestamp).toISOString() : new Date().toISOString())
     };
   }
 
@@ -1456,6 +1511,8 @@
   const input = document.getElementById('entry-input');
   const dueDateInput = document.getElementById('due-date-input');
   const dateToggleDot = document.getElementById('date-toggle-dot');
+  const dueTimeInput = document.getElementById('due-time-input');
+  const timeToggleDot = document.getElementById('time-toggle-dot');
   const typePicker = document.getElementById('type-picker');
   const typeToggle = document.getElementById('type-toggle');
   const typeToggleSymbol = document.getElementById('type-toggle-symbol');
@@ -1524,18 +1581,26 @@
     applyTheme(currentTheme);
   });
 
-  // --- Compact date picker (calendar icon w/ hidden native input) ---
+  // --- Compact date/time pickers (icon w/ hidden native input) ---
   function refreshDueDateVisual() {
     const has = !!dueDateInput.value;
     dateToggleDot.hidden = !has;
     dueDateInput.title = has ? (t().dueTitle + formatDateLabel(dueDateInput.value)) : t().dueDateOptional;
   }
+  function refreshDueTimeVisual() {
+    const has = !!dueTimeInput.value;
+    timeToggleDot.hidden = !has;
+    dueTimeInput.title = has ? (t().dueTimeSetTitle + formatTimeShort(dueTimeInput.value)) : t().dueTimeOptional;
+  }
   dueDateInput.addEventListener('change', refreshDueDateVisual);
-  dueDateInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      try { dueDateInput.showPicker(); } catch (err) { /* not supported: native click still works */ }
-    }
+  dueTimeInput.addEventListener('change', refreshDueTimeVisual);
+  [dueDateInput, dueTimeInput].forEach(el => {
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        try { el.showPicker(); } catch (err) { /* not supported: native click still works */ }
+      }
+    });
   });
 
   // --- Collapsible type picker (popover) ---
@@ -1619,6 +1684,7 @@
       b.title = tr[TYPE_TITLE_KEY[b.dataset.type]];
     });
     refreshDueDateVisual();
+    refreshDueTimeVisual();
     document.getElementById('legend').innerHTML =
       '<span>' + tr.legendTask + '</span>' +
       '<span>' + tr.legendEvent + '</span>' +
@@ -1705,16 +1771,20 @@
       type: selectedType,
       date: TODAY,
       dueDate: dueDateInput.value || null,
+      dueTime: dueDateInput.value && dueTimeInput.value ? dueTimeInput.value : null,
       status: 'incomplete',
       cancelled: false,
       important: false,
       parentId: null,
-      orderIndex: Date.now()
+      orderIndex: Date.now(),
+      createdAt: new Date().toISOString()
     });
     saveEntries(entries);
     input.value = '';
     dueDateInput.value = '';
+    dueTimeInput.value = '';
     refreshDueDateVisual();
+    refreshDueTimeVisual();
     render();
     input.focus();
   });
@@ -1793,63 +1863,74 @@
     });
   }
 
-  function startAddDueDate(entry, btnEl) {
-    const inputEl = document.createElement('input');
-    inputEl.type = 'date';
-    inputEl.className = 'edit-date-input';
-    btnEl.replaceWith(inputEl);
-    inputEl.focus();
+  function createDueEditor(entry, onCommit, onCancel) {
+    const wrap = document.createElement('span');
+    wrap.className = 'due-editor';
+    const dateEl = document.createElement('input');
+    dateEl.type = 'date';
+    dateEl.className = 'edit-date-input';
+    dateEl.value = entry.dueDate || '';
+    const timeEl = document.createElement('input');
+    timeEl.type = 'time';
+    timeEl.className = 'edit-time-input';
+    timeEl.value = entry.dueTime || '';
+    timeEl.title = t().dueTimeOptional;
+    wrap.appendChild(dateEl);
+    wrap.appendChild(timeEl);
 
     let settled = false;
     const commit = () => {
       if (settled) return;
       settled = true;
-      if (inputEl.value) entry.dueDate = inputEl.value;
-      saveEntries(entries);
-      render();
+      onCommit(dateEl.value || null, timeEl.value || null);
     };
-    const cancelEdit = () => {
+    const cancel = () => {
       if (settled) return;
       settled = true;
-      render();
+      onCancel();
     };
 
-    inputEl.addEventListener('blur', commit);
-    inputEl.addEventListener('change', commit);
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); inputEl.blur(); }
-      if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    wrap.addEventListener('focusout', (e) => {
+      if (wrap.contains(e.relatedTarget)) return;
+      commit();
     });
+    [dateEl, timeEl].forEach(el => {
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); commit(); }
+        if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+      });
+    });
+
+    return { wrap, dateEl };
+  }
+
+  function startAddDueDate(entry, btnEl) {
+    const { wrap, dateEl } = createDueEditor(
+      entry,
+      (dueDate, dueTime) => {
+        if (dueDate) { entry.dueDate = dueDate; entry.dueTime = dueTime; }
+        saveEntries(entries);
+        render();
+      },
+      render
+    );
+    btnEl.replaceWith(wrap);
+    dateEl.focus();
   }
 
   function startEditDueDate(entry, badgeEl) {
-    const inputEl = document.createElement('input');
-    inputEl.type = 'date';
-    inputEl.className = 'edit-date-input';
-    inputEl.value = entry.dueDate || '';
-    badgeEl.replaceWith(inputEl);
-    inputEl.focus();
-
-    let settled = false;
-    const commit = () => {
-      if (settled) return;
-      settled = true;
-      entry.dueDate = inputEl.value || null;
-      saveEntries(entries);
-      render();
-    };
-    const cancelEdit = () => {
-      if (settled) return;
-      settled = true;
-      render();
-    };
-
-    inputEl.addEventListener('blur', commit);
-    inputEl.addEventListener('change', commit);
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); inputEl.blur(); }
-      if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
-    });
+    const { wrap, dateEl } = createDueEditor(
+      entry,
+      (dueDate, dueTime) => {
+        entry.dueDate = dueDate;
+        entry.dueTime = dueDate ? dueTime : null;
+        saveEntries(entries);
+        render();
+      },
+      render
+    );
+    badgeEl.replaceWith(wrap);
+    dateEl.focus();
   }
 
   function createSubnoteInputRow(parentEntry) {
@@ -1873,11 +1954,13 @@
           type: 'note',
           date: parentEntry.date,
           dueDate: null,
+          dueTime: null,
           status: 'incomplete',
           cancelled: false,
           important: false,
           parentId: parentEntry.id,
-          orderIndex: Date.now()
+          orderIndex: Date.now(),
+          createdAt: new Date().toISOString()
         });
         saveEntries(entries);
       }
@@ -1923,9 +2006,10 @@
       : (entry.type === 'event' ? tr.eventTitle : tr.noteTitle);
 
     const dragHandleHtml = draggable ? '<span class="drag-handle" title="' + escapeHtml(tr.legendDrag) + '">⋮⋮</span>' : '';
-    const dueBadgeHtml = renderDueBadgeHtml(entry.dueDate);
+    const dueBadgeHtml = renderDueBadgeHtml(entry.dueDate, entry.dueTime);
     const dueAddBtnHtml = !entry.dueDate ? '<button type="button" class="icon-btn due-add-btn" title="' + escapeHtml(tr.setDueDate) + '">📅</button>' : '';
     const dateChipHtml = opts.showDateChip ? '<span class="date-chip">' + escapeHtml(formatDateShort(entry.date)) + '</span>' : '';
+    const createdChipHtml = '<span class="created-chip" title="' + escapeHtml(tr.createdAtTitle + formatCreatedAtFull(entry.createdAt)) + '">🕐 ' + escapeHtml(formatCreatedAt(entry.createdAt)) + '</span>';
 
     li.innerHTML =
       dragHandleHtml +
@@ -1933,6 +2017,7 @@
       '<span class="entry-text" title="' + escapeHtml(tr.editTitle) + '">' + escapeHtml(entry.text) + '</span>' +
       dueBadgeHtml +
       dateChipHtml +
+      createdChipHtml +
       '<button type="button" class="star-btn' + (entry.important ? ' active' : '') + '" title="' + (entry.important ? escapeHtml(tr.unmarkImportant) : escapeHtml(tr.markImportant)) + '">' + (entry.important ? '★' : '☆') + '</button>' +
       '<span class="actions">' +
         dueAddBtnHtml +
